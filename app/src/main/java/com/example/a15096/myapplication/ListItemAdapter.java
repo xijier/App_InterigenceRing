@@ -43,7 +43,7 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
         return position;
     }
 
-    public void deleteItemId(int position) {
+    public void deleteItem(int position) {
         this.mList.remove(position);
         notifyDataSetChanged();
     }

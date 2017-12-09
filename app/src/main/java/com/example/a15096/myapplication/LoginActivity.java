@@ -96,6 +96,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 deviceSetPage();
             }
         });
+        Button email_register_button = (Button) findViewById(R.id.email_register_button);
+        email_register_button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                registerPage();
+            }
+        });
+
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }
@@ -141,6 +149,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 populateAutoComplete();
             }
         }
+    }
+    /**
+     * register page
+     */
+    private void registerPage()
+    {
+        Intent intent=new Intent(this,RegisterActivity.class);
+        startActivity(intent);
+
     }
 
     /**

@@ -12,6 +12,8 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Switch;
+import android.support.v7.app.AlertDialog;
+import android.content.DialogInterface;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,7 +21,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import android.widget.AdapterView.OnItemClickListener;
+
 import com.example.a15096.myapplication.ListItemAdapter.InnerItemOnclickListener;
 
 public class controlDeviceActivity extends AppCompatActivity implements InnerItemOnclickListener,
@@ -31,15 +35,15 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private Context mContext = null;
     private final static String PREFRENCE_FILE_KEY = "com.example.a15096.shared_preferences";
     private SharedPreferences mSharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control_device);
         mContext = controlDeviceActivity.this;
         initView();
-        mSharedPreferences=getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
-        if(!mSharedPreferences.getAll().isEmpty())
-        {
+        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+        if (!mSharedPreferences.getAll().isEmpty()) {
             Map<String, ?> map = mSharedPreferences.getAll();
             Iterator iter = map.entrySet().iterator();
             while (iter.hasNext()) {
@@ -67,9 +71,8 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     /**
      * Device Set page
      */
-    private void deviceSetPage()
-    {
-        Intent intent=new Intent(this,deviceSetActivity.class);
+    private void deviceSetPage() {
+        Intent intent = new Intent(this, deviceSetActivity.class);
         startActivity(intent);
     }
 
@@ -89,7 +92,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                 break;
             case R.id.buttonDelete:
                 Log.e("内部item--2-->", position + " delete");
-                mAdapter.deleteItemId(position);
+                showDeleteDialog(position);
                 break;
             default:
                 break;
@@ -100,5 +103,25 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     public void onItemClick(AdapterView<?> parent, View view, int position,
                             long id) {
         Log.e("整体item----->", position + "");
+    }
+
+    private void showDeleteDialog(int position) {
+        final  int pos = position;
+        new AlertDialog.Builder(this)
+                .setTitle("确定删除")
+                .setMessage(mDataList.get(pos))
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mAdapter.deleteItem(pos);
+                    }
+                })
+                .create().show();
     }
 }
