@@ -27,12 +27,15 @@ public class deviceSetActivity extends AppCompatActivity {
     private Button btn_remove;
     private int flag = 1;
     private Data mData_5 = null;   //用来临时放对象的
-
+    private final static String PREFRENCE_FILE_KEY = "com.example.a15096.shared_preferences";
+    private SharedPreferences mSharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_set);
         mContext = deviceSetActivity.this;
+
+
         mData = new LinkedList<Data>();
         btn_add = (Button) findViewById(R.id.btn_add);
         btn_add.setOnClickListener(new View.OnClickListener() {
@@ -45,7 +48,11 @@ public class deviceSetActivity extends AppCompatActivity {
 
     private void adddeviceSet()
     {
-        //mData_5 = new Data(R.mipmap.ic_launcher,"我的设备01" + flag);
-        flag++;
+        TextView deviceSetname = (TextView) findViewById(R.id.deviceSetname);
+        TextView wifipassword = (TextView) findViewById(R.id.wifipassword);
+        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+        Editor editor = mSharedPreferences.edit();
+        editor.putString(deviceSetname.getText().toString(), wifipassword.getText().toString());
+        editor.commit();
     }
 }

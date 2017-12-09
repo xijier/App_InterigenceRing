@@ -3,6 +3,7 @@ package com.example.a15096.myapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -42,6 +43,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         setContentView(R.layout.activity_control_device);
         mContext = controlDeviceActivity.this;
         initView();
+        mDataList = new ArrayList<String>();
         mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
         if (!mSharedPreferences.getAll().isEmpty()) {
             Map<String, ?> map = mSharedPreferences.getAll();
@@ -49,11 +51,12 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
             while (iter.hasNext()) {
                 Map.Entry entry = (Map.Entry) iter.next();
                 String key = (String) entry.getKey();
+                mDataList.add(key);
             }
         }
-        mDataList = new ArrayList<String>();
+
         for (int i = 0; i < Datas.length; i++) {
-            mDataList.add(Datas[i]);
+          // mDataList.add(Datas[i]);
         }
         mAdapter = new ListItemAdapter(mDataList, this);
         mAdapter.setOnInnerItemOnClickListener(this);
@@ -119,6 +122,11 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        // 清除sharedpreferences的数据
+                        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+                        Editor editor = mSharedPreferences.edit();
+                        editor.remove(mAdapter.getItem(pos).toString());
+                        editor.commit();// 提交修改
                         mAdapter.deleteItem(pos);
                     }
                 })
