@@ -20,16 +20,6 @@
         android:layout_marginTop="10.0dip"
         android:orientation="horizontal"
         android:touchscreenBlocksFocus="false">
-        <Button
-            android:id="@+id/buttonDeviceSet"
-            android:layout_width="197dp"
-            android:layout_height="wrap_content"
-            android:text="@string/action_set" />
-        <Button
-            android:id="@+id/buttonDeviceControl"
-            android:layout_width="197dp"
-            android:layout_height="wrap_content"
-            android:text="@string/action_control"/>
         </LinearLayout>
     <LinearLayout
         android:layout_width="fill_parent"
@@ -38,24 +28,11 @@
         android:layout_marginTop="10.0dip"
         android:orientation="vertical"
         android:touchscreenBlocksFocus="false">
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5.0dip"
-            android:layout_marginTop="10.0dip"
-            android:orientation="horizontal"
-            android:touchscreenBlocksFocus="false">
             <Button
                 android:id="@+id/btn_add"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/action_addDevice" />
-            <Button
-                android:id="@+id/btn_remove"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="删除设备" />
-            </LinearLayout>
         <ListView
             android:id="@+id/list_one"
             android:layout_width="match_parent"

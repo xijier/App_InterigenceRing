@@ -5,67 +5,63 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Switch;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import android.widget.AdapterView.OnItemClickListener;
+import com.example.a15096.myapplication.ListItemAdapter.InnerItemOnclickListener;
 
-public class controlDeviceActivity extends AppCompatActivity {
+public class controlDeviceActivity extends AppCompatActivity implements InnerItemOnclickListener,
+        OnItemClickListener {
     private ListView list_one;
-    private MyAdapter mAdapter = null;
-    private List<Data> mData = null;
+    private List<String> mDataList;
+    private ListItemAdapter mAdapter;
+    private static final String[] Datas = {"客厅灯", "主卧室灯", "厨房灯", "卫生间灯", "次卧灯", "餐厅灯"};
     private Context mContext = null;
-    private Button btn_add;
-    private Button btn_remove;
-    private int flag = 1;
-    private Data mData_5 = null;
     private final static String PREFRENCE_FILE_KEY = "com.example.a15096.shared_preferences";
     private SharedPreferences mSharedPreferences;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control_device);
         mContext = controlDeviceActivity.this;
+        initView();
         mSharedPreferences=getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
-        bindViews();
-        mData = new LinkedList<Data>();
-        mAdapter = new MyAdapter((LinkedList<Data>) mData,mContext);
-        list_one.setAdapter(mAdapter);
-        Button button_DeviceSetButton = (Button) findViewById(R.id.buttonDeviceSet);
-        button_DeviceSetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                deviceSetPage();
-            }
-        });
-
-        Button buttonDeviceControltButton = (Button) findViewById(R.id.buttonDeviceControl);
-        buttonDeviceControltButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                deviceControlPage();
-            }
-        });
-
         if(!mSharedPreferences.getAll().isEmpty())
         {
             Map<String, ?> map = mSharedPreferences.getAll();
             Iterator iter = map.entrySet().iterator();
             while (iter.hasNext()) {
                 Map.Entry entry = (Map.Entry) iter.next();
-               String key = (String) entry.getKey();
-                //String val = (String) entry.getValue();
-                mData_5 = new Data(R.mipmap.ic_launcher, key + flag);
-                mAdapter.add(mData_5);
-                flag++;
+                String key = (String) entry.getKey();
             }
         }
+        mDataList = new ArrayList<String>();
+        for (int i = 0; i < Datas.length; i++) {
+            mDataList.add(Datas[i]);
+        }
+        mAdapter = new ListItemAdapter(mDataList, this);
+        mAdapter.setOnInnerItemOnClickListener(this);
+        list_one.setAdapter(mAdapter);
+        list_one.setOnItemClickListener(this);
+        Button addDeviceSet = (Button) findViewById(R.id.addDeviceSet);
+        addDeviceSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deviceSetPage();
+            }
+        });
     }
 
     /**
@@ -77,16 +73,32 @@ public class controlDeviceActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    /**
-     * Device Control page
-     */
-    private void deviceControlPage()
-    {
-        Intent intent=new Intent(this,controlDeviceActivity.class);
-        startActivity(intent);
+    private void initView() {
+        list_one = (ListView) findViewById(R.id.lv);
     }
 
-    private void bindViews(){
-        list_one = (ListView) findViewById(R.id.list_one);
+    @Override
+    public void itemClick(View v) {
+        int position;
+        position = (Integer) v.getTag();
+
+        switch (v.getId()) {
+            case R.id.switchlight:
+                Switch sw = (Switch) v.findViewById(R.id.switchlight);
+                Log.e("内部item--1-->", position + "" + sw.isChecked() + Datas[position]);
+                break;
+            case R.id.buttonDelete:
+                Log.e("内部item--2-->", position + " delete");
+                mAdapter.deleteItemId(position);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position,
+                            long id) {
+        Log.e("整体item----->", position + "");
     }
 }

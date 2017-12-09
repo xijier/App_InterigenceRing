@@ -45,8 +45,8 @@ public class MyAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = LayoutInflater.from(mContext).inflate(R.layout.item_list, parent, false);
             holder = new ViewHolder();
-            holder.img_icon = (ImageView) convertView.findViewById(R.id.img_icon);
-            holder.txt_content = (TextView) convertView.findViewById(R.id.txt_content);
+            holder.img_icon = null;//(ImageView) convertView.findViewById(R.id.img_icon);
+            holder.txt_content = null;//(TextView) convertView.findViewById(R.id.txt_content);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();

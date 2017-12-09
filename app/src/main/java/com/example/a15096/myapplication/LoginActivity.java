@@ -148,7 +148,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private void deviceSetPage()
     {
-        Intent intent=new Intent(this,deviceSetActivity.class);
+        Intent intent=new Intent(this,controlDeviceActivity.class);
         startActivity(intent);
     }
 

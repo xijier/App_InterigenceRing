@@ -7,7 +7,7 @@ package com.example.a15096.myapplication;
 public class Data {
     private int imgId;
     private String content;
-
+    private int switchId;
     public Data() {}
 
     public Data(int imgId, String content) {
@@ -15,6 +15,15 @@ public class Data {
         this.content = content;
     }
 
+    public Data(int imgId,int switchId, String content) {
+        this.imgId = imgId;
+        this.content = content;
+        this.switchId = switchId;
+    }
+
+    public int getswitchId() {
+        return switchId;
+    }
     public int getImgId() {
         return imgId;
     }
@@ -25,6 +34,9 @@ public class Data {
 
     public void setImgId(int imgId) {
         this.imgId = imgId;
+    }
+    public void setswitchId(int switchId) {
+        this.switchId = switchId;
     }
 
     public void setContent(String content) {

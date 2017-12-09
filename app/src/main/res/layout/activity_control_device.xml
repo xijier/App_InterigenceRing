@@ -12,28 +12,26 @@
         android:layout_marginTop="10.0dip"
         android:orientation="vertical"
         android:touchscreenBlocksFocus="false">
-    <LinearLayout
-        android:id="@+id/layout_login_name"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5.0dip"
-        android:layout_marginTop="10.0dip"
-        android:orientation="horizontal"
-        android:touchscreenBlocksFocus="false">
-        <Button
-            android:id="@+id/buttonDeviceSet"
-            android:layout_width="197dp"
-            android:layout_height="wrap_content"
-            android:text="@string/action_set" />
-        <Button
-            android:id="@+id/buttonDeviceControl"
-            android:layout_width="197dp"
-            android:layout_height="wrap_content"
-            android:text="@string/action_control"/>
-    </LinearLayout>
-    <ListView
-        android:id="@+id/list_one"
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="智环科技"
+            android:background="?attr/colorPrimary" >
+            <Button
+                android:id="@+id/addDeviceSet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|center_vertical"
+                android:background="@android:drawable/ic_input_add" />
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+        <ListView
+            android:id="@+id/lv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
