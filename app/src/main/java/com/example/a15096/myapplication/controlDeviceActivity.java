@@ -32,7 +32,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private ListView list_one;
     private List<String> mDataList;
     private ListItemAdapter mAdapter;
-    private static final String[] Datas = {"客厅灯", "主卧室灯", "厨房灯", "卫生间灯", "次卧灯", "餐厅灯"};
+    //private static final String[] Datas = {"客厅灯", "主卧室灯", "厨房灯", "卫生间灯", "次卧灯", "餐厅灯"};
     private Context mContext = null;
     private final static String PREFRENCE_FILE_KEY = "com.example.a15096.shared_preferences";
     private SharedPreferences mSharedPreferences;
@@ -42,22 +42,9 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control_device);
         mContext = controlDeviceActivity.this;
-        initView();
         mDataList = new ArrayList<String>();
-        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
-        if (!mSharedPreferences.getAll().isEmpty()) {
-            Map<String, ?> map = mSharedPreferences.getAll();
-            Iterator iter = map.entrySet().iterator();
-            while (iter.hasNext()) {
-                Map.Entry entry = (Map.Entry) iter.next();
-                String key = (String) entry.getKey();
-                mDataList.add(key);
-            }
-        }
-
-        for (int i = 0; i < Datas.length; i++) {
-          // mDataList.add(Datas[i]);
-        }
+        initView();
+        getPreferencesData();
         mAdapter = new ListItemAdapter(mDataList, this);
         mAdapter.setOnInnerItemOnClickListener(this);
         list_one.setAdapter(mAdapter);
@@ -83,6 +70,19 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         list_one = (ListView) findViewById(R.id.lv);
     }
 
+    private void getPreferencesData() {
+        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+        if (!mSharedPreferences.getAll().isEmpty()) {
+            Map<String, ?> map = mSharedPreferences.getAll();
+            Iterator iter = map.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry entry = (Map.Entry) iter.next();
+                String key = (String) entry.getKey();
+                mDataList.add(key);
+            }
+        }
+    }
+
     @Override
     public void itemClick(View v) {
         int position;
@@ -91,7 +91,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         switch (v.getId()) {
             case R.id.switchlight:
                 Switch sw = (Switch) v.findViewById(R.id.switchlight);
-                Log.e("内部item--1-->", position + "" + sw.isChecked() + Datas[position]);
+                Log.e("内部item--1-->", position + "" + sw.isChecked() + mDataList.get(position));
                 break;
             case R.id.buttonDelete:
                 Log.e("内部item--2-->", position + " delete");

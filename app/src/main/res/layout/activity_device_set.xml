@@ -41,7 +41,6 @@
             android:ems="10"
             android:inputType="textPersonName"
             android:hint="设备名称" />
-
         <EditText
             android:id="@+id/wifipassword"
             android:layout_width="match_parent"
@@ -49,6 +48,13 @@
             android:ems="10"
             android:hint="wifi密码"
             android:inputType="textPassword" />
+        <EditText
+            android:id="@+id/deviceaddStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:visibility="invisible" />
     </LinearLayout>
     </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>

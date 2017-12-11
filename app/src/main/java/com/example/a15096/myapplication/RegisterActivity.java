@@ -34,5 +34,6 @@ public class RegisterActivity extends AppCompatActivity {
         TextView email = (TextView) findViewById(R.id.register_EmailAddress);
         TextView password = (TextView) findViewById(R.id.register_textPassword);
         TextView register_area = (TextView) findViewById(R.id.register_area);
+
     }
 }

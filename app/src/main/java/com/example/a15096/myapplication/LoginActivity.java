@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -29,9 +30,18 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-
+import android.os.Handler;
+import	java.net.HttpURLConnection;
+import java.net.URLConnection;
+import 	java.net.URL;
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
@@ -43,7 +53,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
-
+    public static final int SHOW_RESPONSE = 0;
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -62,6 +72,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
 
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case SHOW_RESPONSE:
+                    String response = (String) msg.obj;
+                   // textView_response.setText(response);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -375,6 +400,85 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
+        public String getXmlFromUrl(String urlString) {
+//            URL url ;
+//            try {
+//                url = new URL("http://www.android.com/");
+//                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+//                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+//                readStream(in);
+//            }
+//            catch (Exception e) {
+//                System.out.println("Error: " + e.getMessage());
+//                e.printStackTrace();
+//            }finally {
+//                urlConnection.disconnect();
+//            }
+            String xml = null;
+            URL url;
+            HttpURLConnection urlConnection = null;
+            try {
+                url = new URL(urlString);
+                url.openConnection();
+                urlConnection = (HttpURLConnection) url.openConnection();
+
+                InputStream in = urlConnection.getInputStream();
+
+                InputStreamReader isw = new InputStreamReader(in);
+
+                BufferedReader br = new BufferedReader(isw);
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line+"\n");
+                }
+                br.close();
+
+                xml = sb.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            // return XML
+            return xml;
+        }
+        //方法：发送网络请求，获取百度首页的数据。在里面开启线程
+//        private void sendRequestWithHttpClient() {
+//            new Thread(new Runnable() {
+//
+//                @Override
+//                public void run() {
+//                    //用HttpClient发送请求，分为五步
+//                    //第一步：创建HttpClient对象
+//                    HttpClient httpCient = new DefaultHttpClient();
+//                    //第二步：创建代表请求的对象,参数是访问的服务器地址
+//                    HttpGet httpGet = new HttpGet("http://www.baidu.com");
+//
+//                    try {
+//                        //第三步：执行请求，获取服务器发还的相应对象
+//                        HttpResponse httpResponse = httpCient.execute(httpGet);
+//                        //第四步：检查相应的状态是否正常：检查状态码的值是200表示正常
+//                        if (httpResponse.getStatusLine().getStatusCode() == 200) {
+//                            //第五步：从相应对象当中取出数据，放到entity当中
+//
+//                            HttpEntity entity = httpResponse.getEntity();
+//                            String response = EntityUtils.toString(entity,"utf-8");//将entity当中的数据转换为字符串
+//
+//                            //在子线程中将Message对象发出去
+//                            Message message = new Message();
+//                            message.what = SHOW_RESPONSE;
+//                            message.obj = response.toString();
+//                            handler.sendMessage(message);
+//                        }
+//
+//                    } catch (Exception e) {
+//                        // TODO Auto-generated catch block
+//                        e.printStackTrace();
+//                    }
+//
+//                }
+//            }).start();//这个start()方法不要忘记了
+//
+//        }
     }
 }
 
