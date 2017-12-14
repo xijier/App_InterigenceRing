@@ -57,18 +57,20 @@ public class RegisterActivity extends AppCompatActivity {
      */
     private void registerInformation(View view)
     {
-        TextView usename = (TextView) findViewById(R.id.register_username);
+        TextView usenameView = (TextView) findViewById(R.id.register_username);
         TextView phone = (TextView) findViewById(R.id.register_phoneNumber);
         TextView email = (TextView) findViewById(R.id.register_EmailAddress);
-        TextView password = (TextView) findViewById(R.id.register_textPassword);
+        TextView passwordView = (TextView) findViewById(R.id.register_textPassword);
         TextView register_area = (TextView) findViewById(R.id.register_area);
+        final String  usename= usenameView.getText().toString();
+        final String password = passwordView.getText().toString();
         URL url = null;
        try{
            new Thread() {
                @Override
                public void run() {
-                  loginByGet("33","bb");
-                  // httpUrlConnPost("123","abc");
+                 // loginByGet(usename,password);
+                  httpUrlConnPost(usename,password);
                    // 执行完毕后给handler发送一个空消息
                    handler.sendEmptyMessage(0);
                }
@@ -94,9 +96,10 @@ public class RegisterActivity extends AppCompatActivity {
 //把会出现中文的内容进行URL编码,只有进行了编码之后的才能组合到url地址上提交给服务器
 //不然会数据会提交失败
         try{
-                 username = URLEncoder.encode(username, "utf-8");
+            username = URLEncoder.encode(username, "utf-8");
 //组拼url地址,根据浏览器get方式提交数据的格式来组拼的
-        String path = "http://192.168.1.7:9000";
+       // String path = "http://192.168.0.110:9000/registeruser?username=\"+username+\"&password=\"+password";
+            String path =    "http://192.168.0.110:9000/register?username="+username+"&password="+password;
         URL url = new URL(path);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 //设置请求头
@@ -124,7 +127,7 @@ public class RegisterActivity extends AppCompatActivity {
         URL url = null;
         try {
           //  url = new URL("http://192.168.0.110:9000");
-            url = new URL("http://192.168.1.7:9000");
+            url = new URL("http://192.168.0.110:9000/registeruserTest");
             urlConnection = (HttpURLConnection) url.openConnection();//打开http连接
             urlConnection.setConnectTimeout(3000);//连接的超时时间
             urlConnection.setUseCaches(false);//不使用缓存
@@ -133,7 +136,7 @@ public class RegisterActivity extends AppCompatActivity {
             urlConnection.setReadTimeout(3000);//响应的超时时间
             urlConnection.setDoInput(true);//设置这个连接是否可以写入数据
             urlConnection.setDoOutput(true);//设置这个连接是否可以输出数据
-            urlConnection.setRequestMethod("GET");//设置请求的方式
+            urlConnection.setRequestMethod("POST");//设置请求的方式
             urlConnection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");//设置消息的类型
             urlConnection.connect();// 连接，从上述至此的配置必须要在connect之前完成，实际上它只是建立了一个与服务器的TCP连接
 
