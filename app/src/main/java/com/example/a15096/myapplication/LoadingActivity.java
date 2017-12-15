@@ -1,141 +1,60 @@
 package com.example.a15096.myapplication;
 
-import android.content.Intent;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import java.io.BufferedInputStream;
+import android.os.Handler;
+import android.widget.Toast;
+
+import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import android.os.Handler;
-import	java.net.HttpURLConnection;
-import java.net.URLConnection;
-import 	java.net.URL;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESedeKeySpec;
 
-public class RegisterActivity extends AppCompatActivity {
+public class LoadingActivity extends AppCompatActivity {
 
-    public static final int SHOW_RESPONSE = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
-
-        Button confirm_button = (Button) findViewById(R.id.btn_confirm_register);
-        confirm_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                registerInformation(view);
-            }
-        });
-    }
-    private Handler handler = new Handler() {
-        //当有消息发送出来的时候就执行Handler的这个方法来处理消息分发
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            //处理UI
-        }
-    };
-    /**
-     * Device Set page
-     */
-    private void registerInformation(View view)
-    {
-        TextView usenameView = (TextView) findViewById(R.id.register_username);
-        TextView phone = (TextView) findViewById(R.id.register_phoneNumber);
-        TextView email = (TextView) findViewById(R.id.register_EmailAddress);
-        TextView passwordView = (TextView) findViewById(R.id.register_textPassword);
-        TextView register_area = (TextView) findViewById(R.id.register_area);
-        final String  usename= usenameView.getText().toString();
-        final String password = passwordView.getText().toString();
-        Intent intent = new Intent();
-        intent.setClass(this,LoadingActivity.class);//跳转到加载界面
-        intent.putExtra("username",usenameView.getText().toString());
-        intent.putExtra("password",passwordView.getText().toString());
-        startActivity(intent);
+        setContentView(R.layout.activity_loading);
+        String username = this.getIntent().getStringExtra("username");
+        String password = this.getIntent().getStringExtra("password");
         try{
-           new Thread() {
-               @Override
-               public void run() {
-                 // loginByGet(usename,password);
-                 // httpUrlConnPost(usename,password);
-                   // 执行完毕后给handler发送一个空消息
-                 //  handler.sendEmptyMessage(0);
-               }
-           }.start();
-
-       }
-       catch (Exception e)
-       {
-           e.printStackTrace();
-       }
-
-        // 此处的urlConnection对象实际上是根据URL的
-        // 请求协议(此处是http)生成的URLConnection类
-        // 的子类HttpURLConnection,故此处最好将其转化
-        // 为HttpURLConnection类型的对象,以便用到
-        // HttpURLConnection更多的API.如下:
-
-
-    }
-
-    public String loginByGet(String username, String password)
-             {
-//把会出现中文的内容进行URL编码,只有进行了编码之后的才能组合到url地址上提交给服务器
-//不然会数据会提交失败
-        try{
-            username = URLEncoder.encode(username, "utf-8");
-//组拼url地址,根据浏览器get方式提交数据的格式来组拼的
-       // String path = "http://192.168.0.110:9000/registeruser?username=\"+username+\"&password=\"+password";
-            String path =    "http://192.168.0.110:9000/register?username="+username+"&password="+password;
-        URL url = new URL(path);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//设置请求头
-        conn.setRequestMethod("GET");
-        conn.setConnectTimeout(5000);
-        conn.setReadTimeout(5000);
-//获得状态码
-        int code = conn.getResponseCode();
-        if (code == 200) {
-            InputStream in = conn.getInputStream();
-           // String text = StrStreamUtils.streamToText(in);
-            return "oks";
-        } else {
-            return null;
-        }}
-        catch (Exception e)
+            MyThread myThread =new MyThread(username,password);
+            Thread t1=new Thread(myThread);
+            t1.start();
+            t1.join();
+            LoadingActivity.this.finish();
+            Toast.makeText(getApplicationContext(), "注冊成功", Toast.LENGTH_SHORT).show();
+        }catch (Exception e)
         {
-            handler.sendEmptyMessage(2);
+            Toast.makeText(getApplicationContext(), "注冊失敗", Toast.LENGTH_SHORT).show();
         }
-        return  "s";
     }
 
+    class MyThread extends Thread {
+        private String username;
+        private String password;
+        public MyThread(String username,String password)
+        {
+            this.username = username;
+            this.password = password;
+        }
+
+        public void run() {
+            httpUrlConnPost(username,password);
+            }
+        }
     public void httpUrlConnPost(String name,String password){
         HttpURLConnection urlConnection = null;
         URL url = null;
         try {
-          //  url = new URL("http://192.168.0.110:9000");
+            //  url = new URL("http://192.168.0.110:9000");
             url = new URL("http://192.168.1.9:9000/registeruserTest");
             urlConnection = (HttpURLConnection) url.openConnection();//打开http连接
             urlConnection.setConnectTimeout(3000);//连接的超时时间
@@ -169,7 +88,6 @@ public class RegisterActivity extends AppCompatActivity {
             bw.flush();//刷新缓冲区，把数据发送出去，这步很重要
             out.close();
             bw.close();//使用完关闭
-
             if(urlConnection.getResponseCode()==HttpURLConnection.HTTP_OK){//得到服务端的返回码是否连接成功
                 //------------字节流读取服务端返回的数据------------
                 //InputStream in = urlConnection.getInputStream();//用输入流接收服务端返回的回应数据
@@ -197,13 +115,13 @@ public class RegisterActivity extends AppCompatActivity {
                 String result = buffer.toString();
                 if(result.equals("ok"))
                 {
-                   //
+                    //
                 }
             }else{
-                handler.sendEmptyMessage(2);
+               // handler.sendEmptyMessage(2);
             }
         } catch (Exception e) {
-            handler.sendEmptyMessage(2);
+            //handler.sendEmptyMessage(2);
         }finally{
             urlConnection.disconnect();//使用完关闭TCP连接，释放资源
         }
