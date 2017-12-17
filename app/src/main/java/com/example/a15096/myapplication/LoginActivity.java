@@ -33,12 +33,19 @@ import android.widget.TextView;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import android.os.Handler;
+
+import org.json.JSONObject;
+
 import	java.net.HttpURLConnection;
 import java.net.URLConnection;
 import 	java.net.URL;
@@ -67,7 +74,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private UserLoginTask mAuthTask = null;
 
     // UI references.
-    private AutoCompleteTextView mEmailView;
+    private AutoCompleteTextView mUserLoginView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
@@ -92,7 +99,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mUserLoginView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -149,7 +156,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return true;
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+            Snackbar.make(mUserLoginView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                     .setAction(android.R.string.ok, new View.OnClickListener() {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
@@ -205,11 +212,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         // Reset errors.
-        mEmailView.setError(null);
+        mUserLoginView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        String username = mUserLoginView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -223,13 +230,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
+        if (TextUtils.isEmpty(username)) {
+            mUserLoginView.setError(getString(R.string.error_field_required));
+            focusView = mUserLoginView;
             cancel = true;
         }
 
@@ -240,9 +243,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            try{
+                showProgress(true);
+                mAuthTask = new UserLoginTask(username, password);
+                Boolean status = mAuthTask.execute((Void) null).get();
+                if(status==true)
+                {
+                    Intent intent = new Intent(this, controlDeviceActivity.class);
+                    startActivity(intent);
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
         }
     }
     private boolean isEmailValid(String email) {
@@ -342,7 +356,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
-        mEmailView.setAdapter(adapter);
+        mUserLoginView.setAdapter(adapter);
     }
 
     /**
@@ -351,35 +365,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
+        private final String mUsername;
         private final String mPassword;
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
+        UserLoginTask(String username, String password) {
+            mUsername = username;
             mPassword = password;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+                // Simulate network access
+                Boolean status = httpUrlConnPost(mUsername,mPassword);
+               return  status;
+            } catch (Exception e) {
                 return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
+//            for (String credential : DUMMY_CREDENTIALS) {
+//                String[] pieces = credential.split(":");
+//                if (pieces[0].equals(mUsername)) {
+//                    // Account exists, return true if the password matches.
+//                    return pieces[1].equals(mPassword);
+//                }
+//            }
 
             // TODO: register the new account here.
-            return true;
+            //return true;
         }
 
         @Override
@@ -400,85 +414,68 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
-        public String getXmlFromUrl(String urlString) {
-//            URL url ;
-//            try {
-//                url = new URL("http://www.android.com/");
-//                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-//                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-//                readStream(in);
-//            }
-//            catch (Exception e) {
-//                System.out.println("Error: " + e.getMessage());
-//                e.printStackTrace();
-//            }finally {
-//                urlConnection.disconnect();
-//            }
-            String xml = null;
-            URL url;
+
+        protected boolean httpUrlConnPost(String name,String password){
+            boolean status = false;
             HttpURLConnection urlConnection = null;
+            URL url = null;
             try {
-                url = new URL(urlString);
-                url.openConnection();
-                urlConnection = (HttpURLConnection) url.openConnection();
+                // url = new URL("http://192.168.0.110:9000/mobilelogin");
+                url = new URL("http://192.168.1.6:9000/mobilelogin");
+                urlConnection = (HttpURLConnection) url.openConnection();//打开http连接
+                urlConnection.setConnectTimeout(3000);//连接的超时时间
+                urlConnection.setUseCaches(false);//不使用缓存
+                //urlConnection.setFollowRedirects(false);是static函数，作用于所有的URLConnection对象。
+                urlConnection.setInstanceFollowRedirects(true);//是成员函数，仅作用于当前函数,设置这个连接是否可以被重定向
+                urlConnection.setReadTimeout(3000);//响应的超时时间
+                urlConnection.setDoInput(true);//设置这个连接是否可以写入数据
+                urlConnection.setDoOutput(true);//设置这个连接是否可以输出数据
+                urlConnection.setRequestMethod("POST");//设置请求的方式
+                urlConnection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");//设置消息的类型
+                urlConnection.connect();// 连接，从上述至此的配置必须要在connect之前完成，实际上它只是建立了一个与服务器的TCP连接
 
-                InputStream in = urlConnection.getInputStream();
-
-                InputStreamReader isw = new InputStreamReader(in);
-
-                BufferedReader br = new BufferedReader(isw);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) {
-                    sb.append(line+"\n");
+                JSONObject json = new JSONObject();//创建json对象
+                String passwordEn = Base64_.base64encode(password);
+                json.put("name", URLEncoder.encode(name, "UTF-8"));//使用URLEncoder.encode对特殊和不可见字符进行编码
+                json.put("password", passwordEn);//把数据put进json对象中
+                String jsonstr = json.toString();//把JSON对象按JSON的编码格式转换为字符串
+                //------------字符流写入数据------------
+                OutputStream out = urlConnection.getOutputStream();//输出流，用来发送请求，http请求实际上直到这个函数里面才正式发送出去
+                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));//创建字符流对象并用高效缓冲流包装它，便获得最高的效率,发送的是字符串推荐用字符流，其它数据就用字节流
+                bw.write(jsonstr);//把json字符串写入缓冲区中
+                bw.flush();//刷新缓冲区，把数据发送出去，这步很重要
+                out.close();
+                bw.close();//使用完关闭
+                if(urlConnection.getResponseCode()==HttpURLConnection.HTTP_OK){//得到服务端的返回码是否连接成功
+                    InputStream in = urlConnection.getInputStream();
+                    BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                    String str = null;
+                    StringBuffer buffer = new StringBuffer();
+                    while((str = br.readLine())!=null){
+                        buffer.append(str);
+                    }
+                    in.close();
+                    br.close();
+                    String result = buffer.toString();
+                    if(result.equals("ok"))
+                    {
+                        status  = true;
+                    }
+                    else
+                    {
+                        status =  false;
+                    }
+                }else{
+                    status = false;
+                    // handler.sendEmptyMessage(2);
                 }
-                br.close();
-
-                xml = sb.toString();
             } catch (Exception e) {
-                e.printStackTrace();
+                //handler.sendEmptyMessage(2);
+            }finally{
+                urlConnection.disconnect();//使用完关闭TCP连接，释放资源
+                return status;
             }
-            // return XML
-            return xml;
         }
-        //方法：发送网络请求，获取百度首页的数据。在里面开启线程
-//        private void sendRequestWithHttpClient() {
-//            new Thread(new Runnable() {
-//
-//                @Override
-//                public void run() {
-//                    //用HttpClient发送请求，分为五步
-//                    //第一步：创建HttpClient对象
-//                    HttpClient httpCient = new DefaultHttpClient();
-//                    //第二步：创建代表请求的对象,参数是访问的服务器地址
-//                    HttpGet httpGet = new HttpGet("http://www.baidu.com");
-//
-//                    try {
-//                        //第三步：执行请求，获取服务器发还的相应对象
-//                        HttpResponse httpResponse = httpCient.execute(httpGet);
-//                        //第四步：检查相应的状态是否正常：检查状态码的值是200表示正常
-//                        if (httpResponse.getStatusLine().getStatusCode() == 200) {
-//                            //第五步：从相应对象当中取出数据，放到entity当中
-//
-//                            HttpEntity entity = httpResponse.getEntity();
-//                            String response = EntityUtils.toString(entity,"utf-8");//将entity当中的数据转换为字符串
-//
-//                            //在子线程中将Message对象发出去
-//                            Message message = new Message();
-//                            message.what = SHOW_RESPONSE;
-//                            message.obj = response.toString();
-//                            handler.sendMessage(message);
-//                        }
-//
-//                    } catch (Exception e) {
-//                        // TODO Auto-generated catch block
-//                        e.printStackTrace();
-//                    }
-//
-//                }
-//            }).start();//这个start()方法不要忘记了
-//
-//        }
     }
 }
 

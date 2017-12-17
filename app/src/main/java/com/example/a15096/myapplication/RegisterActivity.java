@@ -100,6 +100,11 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
+    private boolean isEmailValid(String email) {
+        //TODO: Replace this with your own logic
+        return email.contains("@");
+    }
+    
     public String loginByGet(String username, String password)
              {
 //把会出现中文的内容进行URL编码,只有进行了编码之后的才能组合到url地址上提交给服务器
@@ -108,7 +113,7 @@ public class RegisterActivity extends AppCompatActivity {
             username = URLEncoder.encode(username, "utf-8");
 //组拼url地址,根据浏览器get方式提交数据的格式来组拼的
        // String path = "http://192.168.0.110:9000/registeruser?username=\"+username+\"&password=\"+password";
-            String path =    "http://192.168.0.110:9000/register?username="+username+"&password="+password;
+        String path =    "http://192.168.0.110:9000/register?username="+username+"&password="+password;
         URL url = new URL(path);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 //设置请求头

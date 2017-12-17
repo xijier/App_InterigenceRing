@@ -25,13 +25,13 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="phone"
-            android:hint="@string/phoneNumber"/>
+            android:hint="@string/phoneNumber_pass"/>
         <EditText
             android:id="@+id/register_EmailAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:hint="@string/prompt_email"
+            android:hint="@string/email_pass"
             android:inputType="textEmailAddress" />
         <EditText
             android:id="@+id/register_textPassword"

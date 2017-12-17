@@ -55,7 +55,7 @@ public class LoadingActivity extends AppCompatActivity {
         URL url = null;
         try {
             //  url = new URL("http://192.168.0.110:9000");
-            url = new URL("http://192.168.1.9:9000/registeruserTest");
+            url = new URL("http://192.168.1.6:9000/registeruserTest");
             urlConnection = (HttpURLConnection) url.openConnection();//打开http连接
             urlConnection.setConnectTimeout(3000);//连接的超时时间
             urlConnection.setUseCaches(false);//不使用缓存
