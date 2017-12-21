@@ -9,6 +9,7 @@
     <string name="action_set">设置</string>
     <string name="action_control">控制</string>
     <string name="action_confirm">确认</string>
+    <string name="action_forgetPassword">忘记密码？</string>
 
     <string name="UserName">用户名</string>
     <string name="phoneNumber_pass">电话/找回密码使用务必正确</string>

@@ -3,6 +3,7 @@ package com.example.a15096.myapplication;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -43,6 +44,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import android.os.Handler;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -61,6 +63,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private static final int REQUEST_READ_CONTACTS = 0;
     public static final int SHOW_RESPONSE = 0;
+    private int LOGIN_CHANCES = 5;
+    //还剩几次登录机会的标志，初始值就是LOGIN_CHANCES
+    private int count = LOGIN_CHANCES;
+    //多次认证失败时需要等待的时间
+    private float WAIT_TIME = 30000L;
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -218,7 +225,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Store values at the time of the login attempt.
         String username = mUserLoginView.getText().toString();
         String password = mPasswordView.getText().toString();
-
         boolean cancel = false;
         View focusView = null;
 
@@ -244,18 +250,58 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             try{
-                showProgress(true);
-                mAuthTask = new UserLoginTask(username, password);
-                Boolean status = mAuthTask.execute((Void) null).get();
-                if(status==true)
-                {
-                    Intent intent = new Intent(this, controlDeviceActivity.class);
-                    startActivity(intent);
+                SharedPreferences sp = getSharedPreferences("data", MODE_PRIVATE);
+                //输入错误时的时间,如果为空的话就取0L
+                long errorTime = sp.getLong("errorTime", 0L);
+                //获取当前时间
+                long recentTime = System.currentTimeMillis();
+                //如果当前时间与出错时间相差超过30s
+                if(recentTime - errorTime > WAIT_TIME) {
+                    showProgress(true);
+                    mAuthTask = new UserLoginTask(username, password);
+                    Boolean status = mAuthTask.execute((Void) null).get();
+                    if (status) {
+                        //认证成功，跳转到欢迎界面
+                        Intent intent = new Intent(this, controlDeviceActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                    //认证失败
+                    else {
+                        //如果LOGIN_CHANCES次认证全部失败
+                        if(count == 1) {
+                            //清除输入框内容
+                            //editText.setText("");
+                            //count值重置
+                            count = LOGIN_CHANCES;
+                            //Toast提醒
+                            Toast.makeText(LoginActivity.this, "连续" + LOGIN_CHANCES + "次认证失败，请您" + WAIT_TIME / 1000 +"秒后再登陆！", Toast.LENGTH_LONG).show();
+                            //LOGIN_CHANCES次登录失败时，获取此时的Java虚拟机运行时刻并保存提交
+                            errorTime = System.currentTimeMillis();
+
+                            SharedPreferences sp1 = getSharedPreferences("data", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sp1.edit();
+                            editor.putLong("errorTime", errorTime);
+                            editor.commit();
+                        }
+                        //LOGIN_CHANCES次登录机会未用完
+                        else{
+                            //剩余次数减1
+                            count--;
+                            //Toast提醒
+                            Toast.makeText(LoginActivity.this, "您还有" + count + "次登录机会！", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+                //LOGIN_CHANCES次登录机会全部用完，app锁定WAIT_TIME时间，在此期间登录无效，锁定
+                else{
+                    //Toast提醒
+                    Toast.makeText(LoginActivity.this, "登录界面锁定中，请等待！", Toast.LENGTH_LONG).show();
                 }
             }
             catch (Exception e)
             {
-
+                Toast.makeText(LoginActivity.this, "服务器错误", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -420,8 +466,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             HttpURLConnection urlConnection = null;
             URL url = null;
             try {
-                // url = new URL("http://192.168.0.110:9000/mobilelogin");
-                url = new URL("http://192.168.1.6:9000/mobilelogin");
+                url = new URL("http://192.168.0.103:9000/mobilelogin");
+                //  url = new URL("http://192.168.1.6:9000/mobilelogin");
                 urlConnection = (HttpURLConnection) url.openConnection();//打开http连接
                 urlConnection.setConnectTimeout(3000);//连接的超时时间
                 urlConnection.setUseCaches(false);//不使用缓存
