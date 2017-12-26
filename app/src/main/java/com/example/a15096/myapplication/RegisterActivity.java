@@ -88,11 +88,6 @@ public class RegisterActivity extends AppCompatActivity {
         TextView passwordView = (TextView) findViewById(R.id.register_textPassword);
         TextView register_area = (TextView) findViewById(R.id.register_area);
 
-       // Intent intent = new Intent();
-        //intent.setClass(this,LoadingActivity.class);//跳转到加载界面
-       // intent.putExtra("username",usenameView.getText().toString());
-        //intent.putExtra("password",passwordView.getText().toString());
-        //startActivity(intent);
         try{
             String phoneNumber = phone.getText().toString().trim();
             String username = usenameView.getText().toString().trim();
@@ -149,12 +144,8 @@ public class RegisterActivity extends AppCompatActivity {
             // showProgress(false);
             if (success) {
                 finish();
-               // mTvShow.setText("修改成功");
                 Toast.makeText(getApplicationContext(), "注册成功", Toast.LENGTH_SHORT).show();
             } else {
-              //  mTvShow.setError("未验证成功，请重试");
-                //   mPasswordView.setError(getString(R.string.error_incorrect_password));
-                //  mPasswordView.requestFocus();
                 Toast.makeText(getApplicationContext(), "注冊失敗", Toast.LENGTH_SHORT).show();
             }
         }
@@ -170,7 +161,7 @@ public class RegisterActivity extends AppCompatActivity {
             HttpURLConnection urlConnection = null;
             URL url = null;
             try {
-                url = new URL("http://192.168.0.103:9000/registeruser");
+                url = new URL("http://192.168.1.7:9000/registeruser");
                 // url = new URL("http://192.168.1.6:9000/registeruser");
                 urlConnection = (HttpURLConnection) url.openConnection();//打开http连接
                 urlConnection.setConnectTimeout(3000);//连接的超时时间

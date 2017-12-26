@@ -132,7 +132,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         button_wechatButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                deviceSetPage();
+                //SocketSetPage();
             }
         });
         Button email_register_button = (Button) findViewById(R.id.email_register_button);
@@ -423,23 +423,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             try {
-                // Simulate network access
                 Boolean status = httpUrlConnPost(mUsername,mPassword);
                return  status;
             } catch (Exception e) {
                 return false;
             }
-
-//            for (String credential : DUMMY_CREDENTIALS) {
-//                String[] pieces = credential.split(":");
-//                if (pieces[0].equals(mUsername)) {
-//                    // Account exists, return true if the password matches.
-//                    return pieces[1].equals(mPassword);
-//                }
-//            }
-
-            // TODO: register the new account here.
-            //return true;
         }
 
         @Override
@@ -466,8 +454,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             HttpURLConnection urlConnection = null;
             URL url = null;
             try {
-                url = new URL("http://192.168.0.103:9000/mobilelogin");
-                //  url = new URL("http://192.168.1.6:9000/mobilelogin");
+               // url = new URL("http://192.168.0.103:9000/mobilelogin");
+                url = new URL("http://192.168.1.7:9000/mobilelogin");
                 urlConnection = (HttpURLConnection) url.openConnection();//打开http连接
                 urlConnection.setConnectTimeout(3000);//连接的超时时间
                 urlConnection.setUseCaches(false);//不使用缓存

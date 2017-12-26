@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -16,6 +17,10 @@ import android.widget.Switch;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 
+import java.io.DataOutputStream;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Iterator;
@@ -24,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Toast;
 
 import com.example.a15096.myapplication.ListItemAdapter.InnerItemOnclickListener;
 
@@ -34,6 +40,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private ListItemAdapter mAdapter;
     //private static final String[] Datas = {"客厅灯", "主卧室灯", "厨房灯", "卫生间灯", "次卧灯", "餐厅灯"};
     private Context mContext = null;
+    /***数据持久化**/
     private final static String PREFRENCE_FILE_KEY = "com.example.a15096.shared_preferences";
     private SharedPreferences mSharedPreferences;
 
@@ -91,6 +98,21 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         switch (v.getId()) {
             case R.id.switchlight:
                 Switch sw = (Switch) v.findViewById(R.id.switchlight);
+                    try{
+                        if(sw.isChecked())
+                        {
+                            new SendAsyncTask().execute("on");
+                        }
+                        else
+                        {
+                            new SendAsyncTask().execute("off");
+                        }
+
+                    }catch (Exception e)
+                    {
+                       // Toast.makeText(getApplicationContext(), "注冊失敗", Toast.LENGTH_SHORT).show();
+                    }
+                /////////////////////
                 Log.e("内部item--1-->", position + "" + sw.isChecked() + mDataList.get(position));
                 break;
             case R.id.buttonDelete:
@@ -109,7 +131,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     }
 
     private void showDeleteDialog(int position) {
-        final  int pos = position;
+        final int pos = position;
         new AlertDialog.Builder(this)
                 .setTitle("确定删除")
                 .setMessage(mDataList.get(pos))

@@ -6,6 +6,10 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -35,8 +39,7 @@
         </activity>
         <activity android:name=".controlDeviceActivity" />
         <activity android:name=".RegisterActivity" />
-        <activity android:name=".LoadingActivity" />
-        <activity android:name=".resetPasswordActivity"></activity>
+        <activity android:name=".resetPasswordActivity" />
     </application>
 
 </manifest>

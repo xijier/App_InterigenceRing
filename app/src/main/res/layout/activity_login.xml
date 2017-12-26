@@ -38,6 +38,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_user"
                 android:maxLines="1"
+                    android:text="xijier"
                 android:singleLine="true"/>
 
             </android.support.design.widget.TextInputLayout>
@@ -56,6 +57,7 @@
                 android:imeOptions="actionUnspecified"
                 android:inputType="textPassword"
                 android:maxLines="1"
+                android:text="123456"
                 android:singleLine="true"/>
 
             </android.support.design.widget.TextInputLayout>

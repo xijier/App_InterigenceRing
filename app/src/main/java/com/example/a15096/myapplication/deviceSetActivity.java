@@ -3,6 +3,7 @@ package com.example.a15096.myapplication;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.widget.Toast;
 
 public class deviceSetActivity extends AppCompatActivity {
     // private ListView list_one;
@@ -38,7 +40,6 @@ public class deviceSetActivity extends AppCompatActivity {
         mContext = deviceSetActivity.this;
         mData = new LinkedList<Data>();
         btn_add = (Button) findViewById(R.id.btn_add);
-
         btn_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
