@@ -24,7 +24,30 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+
+    
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="esp_esptouch">Esp Touch</string>
+    <string name="esp_esptouch_version">EspTouch v0.3.2</string>
+    <string name="esp_esptouch_current_ssid">当前的SSID: %1$s</string>
+    <string name="esp_esptouch_configure_ssid">请选择要配置到的Wifi</string>
+    <string name="esp_esptouch_ssid_hint">请输入Wifi名称</string>
+    <string name="esp_esptouch_pwd_hint">请输入Wifi密码</string>
+    <string name="esp_esptouch_show_pwd">显示密码</string>
+    <string name="esp_esptouch_isSsidHidden">隐藏SSID</string>
+    <string name="esp_esptouch_delete_pwd">删除密码</string>
+    <string name="esp_esptouch_cannot_find_ap_hing">无法找到路由器: %1$s</string>
+    <string name="esp_esptouch_connection_hint">请先连上一个Wifi</string>
+    <string name="esp_esptouch_configure_message">正在配往 %1$s</string>
+    <string name="esp_esptouch_result_suc">配置成功</string>
+    <string name="esp_esptouch_result_failed">配置失败</string>
+    <string name="esp_esptouch_result_over">配置结束，因当前连接的WIFI与配置的WIFI不同，无法收到反馈，请自行检查结果。</string>
+    <string name="esp_esptouch_result_cancel">取消配置</string>
+
+
     <item name="visible" type="id" />
     <item name="masked" type="id" />
     <string name="title_activity_register">RegisterActivity</string>
+    <string name="title_activity_smart_config">SmartConfigActivity</string>
 </resources>

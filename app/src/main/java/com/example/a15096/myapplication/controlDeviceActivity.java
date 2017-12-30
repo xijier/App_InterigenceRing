@@ -33,6 +33,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 
 import com.example.a15096.myapplication.ListItemAdapter.InnerItemOnclickListener;
+import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.SmartConfigActivity;
 
 public class controlDeviceActivity extends AppCompatActivity implements InnerItemOnclickListener,
         OnItemClickListener {
@@ -74,8 +75,10 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
      * Device Set page
      */
     private void deviceSetPage() {
-        Intent intent = new Intent(this, deviceSetActivity.class);
+        Intent intent = new Intent(this, SmartConfigActivity.class);
         startActivity(intent);
+        //Intent intent = new Intent(this, deviceSetActivity.class);
+        //startActivity(intent);
     }
 
     private void initView() {
