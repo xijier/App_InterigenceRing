@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
@@ -43,6 +44,10 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     /***数据持久化**/
     private final static String PREFRENCE_FILE_KEY = "com.example.a15096.shared_preferences";
     private SharedPreferences mSharedPreferences;
+    Socket socket = null;
+    private SendAsyncTask mSendAsyncTask;
+    private static final String IP = "192.168.0.109";
+    private static final int PORT = 8266;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,11 +106,11 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     try{
                         if(sw.isChecked())
                         {
-                            new SendAsyncTask().execute("on");
+                            getConnectSocket("on");
                         }
                         else
                         {
-                            new SendAsyncTask().execute("off");
+                            getConnectSocket("off");
                         }
 
                     }catch (Exception e)
@@ -121,6 +126,38 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                 break;
             default:
                 break;
+        }
+    }
+
+    public void getConnectSocket(String msg)
+    {
+        try{
+            TimeUnit.MILLISECONDS.sleep(500);
+            SetSocketThread myThread  = new SetSocketThread();
+            myThread.start();
+            myThread.join();
+            TimeUnit.MILLISECONDS.sleep(500);
+            if (socket.isConnected()) {
+                if (!socket.isOutputShutdown()) {
+                    mSendAsyncTask = new SendAsyncTask(socket);
+                    mSendAsyncTask.execute(msg);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+    }
+
+    public class SetSocketThread extends Thread {
+        public void run() {
+            try {
+                socket  =new Socket(IP, PORT);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+            }
         }
     }
 

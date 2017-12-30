@@ -132,7 +132,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         button_wechatButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                //SocketSetPage();
+                deviceSetPage();
             }
         });
         Button email_register_button = (Button) findViewById(R.id.email_register_button);
