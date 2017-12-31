@@ -11,9 +11,10 @@
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
+    <style  name="customCheckbox" parent="@android:style/Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/like_or_not_selector</item>
+    </style>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
     <style name="MyDialogStyle">
         <item name="android:windowBackground">@android:color/transparent</item><!--背景透明-->
         <item name="android:windowFrame">@null</item><!--边框-->

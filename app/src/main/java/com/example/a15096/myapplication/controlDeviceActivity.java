@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.support.v7.app.AlertDialog;
@@ -104,12 +105,13 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         int position;
         position = (Integer) v.getTag();
         switch (v.getId()) {
-            case R.id.switchlight:
+            case R.id.checkboxlight:
 
                 String add = mSharedPreferences.getString(mDataList.get(position),"");
-                Switch sw = (Switch) v.findViewById(R.id.switchlight);
+              //  Switch sw = (Switch) v.findViewById(R.id.switchlight);
+                CheckBox checklight = (CheckBox) v.findViewById(R.id.checkboxlight);
                     try{
-                        if(sw.isChecked())
+                        if(checklight.isChecked())
                         {
                             getConnectSocket("on",add);
                         }
@@ -123,7 +125,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                        // Toast.makeText(getApplicationContext(), "注冊失敗", Toast.LENGTH_SHORT).show();
                     }
                 /////////////////////
-                Log.e("内部item--1-->", position + "" + sw.isChecked() + mDataList.get(position));
+                Log.e("内部item--1-->", position + "" + checklight.isChecked() + mDataList.get(position));
                 break;
             case R.id.buttonDelete:
                 Log.e("内部item--2-->", position + " delete");

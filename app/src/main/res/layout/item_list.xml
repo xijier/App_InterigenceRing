@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="45dp"
     xmlns:tools="http://schemas.android.com/tools"
     android:weightSum="1">
-    <Switch
-        android:id="@+id/switchlight"
+
+    <CheckBox
+        android:id="@+id/checkboxlight"
+        android:layout_height="match_parent"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checked="false"
-        android:textOn="开"
-        tools:checked="false" />
+        style="@style/customCheckbox" />
+    <!--<Switch-->
+        <!--android:id="@+id/switchlight"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:checked="false"-->
+
+        <!--android:textOn="开"-->
+        <!--tools:checked="false" />-->
     <TextView
         android:id="@+id/deviceDecription"
         android:layout_width="wrap_content"

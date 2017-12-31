@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -55,7 +56,8 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
             viewHolder = new ViewHolder();
             convertView = LayoutInflater.from(mContext).inflate(R.layout.item_list,
                     null);
-            viewHolder.switchlight = (Switch) convertView.findViewById(R.id.switchlight);
+            //viewHolder.switchlight = (Switch) convertView.findViewById(R.id.switchlight);
+            viewHolder.checkboxlight = (CheckBox) convertView.findViewById(R.id.checkboxlight);
             viewHolder.deletedevice = (Button) convertView.findViewById(R.id.buttonDelete);
             viewHolder.deviceDecription = (TextView) convertView.findViewById(R.id.deviceDecription);
             viewHolder.status = (TextView) convertView.findViewById(R.id.status);
@@ -63,11 +65,13 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.switchlight.setOnClickListener(this);
+       // viewHolder.switchlight.setOnClickListener(this);
+        viewHolder.checkboxlight.setOnClickListener(this);
         viewHolder.deletedevice.setOnClickListener(this);
         viewHolder.deviceDecription.setOnClickListener(this);
         viewHolder.status.setOnClickListener(this);
-        viewHolder.switchlight.setTag(position);
+        //viewHolder.switchlight.setTag(position);
+        viewHolder.checkboxlight.setTag(position);
         viewHolder.deletedevice.setTag(position);
         viewHolder.deviceDecription.setText(mList.get(position));
         return convertView;
@@ -75,7 +79,8 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
 
     public final static class ViewHolder {
         Button deletedevice;
-        Switch switchlight;
+       // Switch switchlight;
+        CheckBox checkboxlight;
         TextView deviceDecription;
         TextView status;
     }
