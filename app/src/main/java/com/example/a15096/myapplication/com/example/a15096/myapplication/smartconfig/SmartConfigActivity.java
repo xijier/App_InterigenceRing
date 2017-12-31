@@ -38,6 +38,7 @@ import com.example.a15096.myapplication.com.example.a15096.myapplication.smartco
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 
 public class SmartConfigActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener
 ,AdapterView.OnItemSelectedListener
@@ -45,13 +46,16 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
     private static final String SSID_PASSWORD = "ssid_password";
     private static final int REQUEST_CODE_ACCESS_COARSE_LOCATION = 1;
     private SharedPreferences mShared;
+    private final static String PREFRENCE_FILE_KEY = "com.example.a15096.shared_preferences";
+    private SharedPreferences mSharedPreferences;
+
     private TextView mCurrentSsidTV;
-    private Spinner mConfigureSP;
-    private EditText mSsidET;
+   // private Spinner mConfigureSP;
+    private TextView mSsidET;
     private EditText mPasswordET;
     private CheckBox mShowPasswordCB;
-    private CheckBox mIsSsidHiddenCB;
-    private Button mDeletePasswordBtn;
+    //private CheckBox mIsSsidHiddenCB;
+    //private Button mDeletePasswordBtn;
     private Button mConfirmBtn;
     private WifiManager wifimanager;
 
@@ -86,7 +90,14 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
             mCurrentSSID = "";
         }
         mCurrentSsidTV.setText(getString(R.string.esp_esptouch_current_ssid, mCurrentSSID));
-
+        String replaceStr =  mCurrentSSID;
+        char quto='"';
+        if(replaceStr.charAt(0)==quto&& replaceStr.charAt(replaceStr.length()-1)==quto)
+        {
+            replaceStr = replaceStr.substring(1, replaceStr.length());
+            replaceStr = replaceStr.substring(0,replaceStr.length() - 1);
+        }
+        mSsidET.setText(replaceStr);
         if (!TextUtils.isEmpty(mCurrentSSID))
         {
             scanWifi();
@@ -96,7 +107,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
                 String ssid = mScanResultList.get(i).SSID;
                 if (ssid.equals(mCurrentSSID))
                 {
-                    mConfigureSP.setSelection(i);
+                    //mConfigureSP.setSelection(i);
                     break;
                 }
             }
@@ -158,6 +169,49 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
             mScanResultSsidList.add(scanResult.SSID);
         }
     }
+
+    private void adddeviceSet(String address)
+    {
+        char quto='/';
+        if(address.charAt(0)==quto)
+        {
+            address = address.substring(1, address.length());
+        }
+        Long timeSpan= System.currentTimeMillis();
+        TextView deviceSetname = (TextView) findViewById(R.id.deviceSetname);
+        TextView wifipassword = (TextView) findViewById(R.id.esptouch_pwd);
+        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+        String deviceName = deviceSetname.getText().toString();
+        if(!mSharedPreferences.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
+        {
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putString(deviceSetname.getText().toString(), address);
+            editor.commit();
+        }
+        else if(deviceName.isEmpty())
+        {
+            int i = 1;
+            while(mSharedPreferences.getAll().containsKey(deviceName+String.valueOf(i)))
+            {
+                i++;
+            }
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putString(deviceName+String.valueOf(i), address);
+            editor.commit();
+        }
+        else
+        {
+            int i = 1;
+            while(mSharedPreferences.getAll().containsKey("智能环设备"+String.valueOf(i)))
+            {
+                i++;
+            }
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putString("智能环设备"+String.valueOf(i),address);
+            editor.commit();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -165,28 +219,29 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         mShared = getSharedPreferences(SSID_PASSWORD, Context.MODE_PRIVATE);
 
         mCurrentSsidTV = (TextView)findViewById(R.id.esptouch_current_ssid);
-        mConfigureSP = (Spinner)findViewById(R.id.esptouch_configure_wifi);
+       // mConfigureSP = (Spinner)findViewById(R.id.esptouch_configure_wifi);
         mPasswordET = (EditText)findViewById(R.id.esptouch_pwd);
-        mSsidET = (EditText)findViewById(R.id.esptouch_ssid);
+        mSsidET = (TextView)findViewById(R.id.esptouch_ssid);
         mShowPasswordCB = (CheckBox)findViewById(R.id.esptouch_show_pwd);
-        mIsSsidHiddenCB = (CheckBox)findViewById(R.id.esptouch_isSsidHidden);
-        mDeletePasswordBtn = (Button)findViewById(R.id.esptouch_delete_pwd);
+       // mIsSsidHiddenCB = (CheckBox)findViewById(R.id.esptouch_isSsidHidden);
+      //  mDeletePasswordBtn = (Button)findViewById(R.id.esptouch_delete_pwd);
         mConfirmBtn = (Button)findViewById(R.id.esptouch_confirm);
 
         mShowPasswordCB.setOnCheckedChangeListener(this);
 
-        mDeletePasswordBtn.setOnClickListener(this);
+        //mDeletePasswordBtn.setOnClickListener(this);
         mConfirmBtn.setOnClickListener(this);
 
         mScanResultList = new ArrayList<ScanResult>();
         mScanResultSsidList = new ArrayList<String>();
         mWifiAdapter =
                 new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, mScanResultSsidList);
-        mConfigureSP.setAdapter(mWifiAdapter);
-        mConfigureSP.setOnItemSelectedListener(this);
+       // mConfigureSP.setAdapter(mWifiAdapter);
+       // mConfigureSP.setOnItemSelectedListener(this);
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(mReceiver, filter);
+
     }
 
     @Override
@@ -246,6 +301,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
             if (result.isSuc())
             {
                 String add = result.getInetAddress().toString();
+                adddeviceSet(add);
                 toastMsg = R.string.esp_esptouch_result_suc;
             }
             else if (result.isCancelled())
@@ -284,7 +340,8 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
                 String ssid = mSsidET.getText().toString();
                 String password = mPasswordET.getText().toString();
                 mShared.edit().putString(ssid, password).commit();
-                boolean isSsidHidden = mIsSsidHiddenCB.isChecked();
+               // boolean isSsidHidden = mIsSsidHiddenCB.isChecked();
+                boolean isSsidHidden = true;
                 // find the bssid is scanList
                 String bssid = scanApBssidBySsid(ssid);
                 if (bssid == null)
@@ -295,6 +352,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
                 else
                 {
                     new ConfigureTask(this, ssid, bssid, password, isSsidHidden).execute();
+
                 }
             }
             else
@@ -302,15 +360,15 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
                 Toast.makeText(this, R.string.esp_esptouch_connection_hint, Toast.LENGTH_LONG).show();
             }
         }
-        else if (view == mDeletePasswordBtn)
-        {
-            String selectionSSID = mConfigureSP.getSelectedItem().toString();
-            if (!TextUtils.isEmpty(selectionSSID))
-            {
-                mShared.edit().remove(selectionSSID).commit();
-                mPasswordET.setText("");
-            }
-        }
+//        else if (view == mDeletePasswordBtn)
+//        {
+//            String selectionSSID = mConfigureSP.getSelectedItem().toString();
+//            if (!TextUtils.isEmpty(selectionSSID))
+//            {
+//                mShared.edit().remove(selectionSSID).commit();
+//                mPasswordET.setText("");
+//            }
+//        }
 
     }
 

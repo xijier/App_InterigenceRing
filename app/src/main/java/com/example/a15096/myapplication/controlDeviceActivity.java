@@ -75,6 +75,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
      * Device Set page
      */
     private void deviceSetPage() {
+        finish();
         Intent intent = new Intent(this, SmartConfigActivity.class);
         startActivity(intent);
         //Intent intent = new Intent(this, deviceSetActivity.class);
@@ -102,18 +103,19 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     public void itemClick(View v) {
         int position;
         position = (Integer) v.getTag();
-
         switch (v.getId()) {
             case R.id.switchlight:
+
+                String add = mSharedPreferences.getString(mDataList.get(position),"");
                 Switch sw = (Switch) v.findViewById(R.id.switchlight);
                     try{
                         if(sw.isChecked())
                         {
-                            getConnectSocket("on");
+                            getConnectSocket("on",add);
                         }
                         else
                         {
-                            getConnectSocket("off");
+                            getConnectSocket("off",add);
                         }
 
                     }catch (Exception e)
@@ -132,11 +134,11 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         }
     }
 
-    public void getConnectSocket(String msg)
+    public void getConnectSocket(String msg,String add)
     {
         try{
             TimeUnit.MILLISECONDS.sleep(500);
-            SetSocketThread myThread  = new SetSocketThread();
+            SetSocketThread myThread  = new SetSocketThread(add);
             myThread.start();
             myThread.join();
             TimeUnit.MILLISECONDS.sleep(500);
@@ -154,9 +156,14 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     }
 
     public class SetSocketThread extends Thread {
+        String ip = null;
+        SetSocketThread(String ip)
+        {
+            this.ip = ip;
+        }
         public void run() {
             try {
-                socket  =new Socket(IP, PORT);
+                socket  =new Socket(this.ip, PORT);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

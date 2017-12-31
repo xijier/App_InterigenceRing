@@ -12,31 +12,32 @@
         android:layout_marginTop="10.0dip"
         android:orientation="vertical"
         android:touchscreenBlocksFocus="false">
-    <TextView
-        android:id="@+id/esptouch_current_ssid"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dip"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/esptouch_current_ssid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dip"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:visibility="invisible" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5dip"
-        android:text="@string/esp_esptouch_configure_ssid"
+        android:text="当前已连接WiFi"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <Spinner
-        android:id="@+id/esptouch_configure_wifi"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <!--<Spinner-->
+        <!--android:id="@+id/esptouch_configure_wifi"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content" />-->
 
-    <EditText
+    <TextView
         android:id="@+id/esptouch_ssid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dip"
-        android:hint="@string/esp_esptouch_ssid_hint"
         android:inputType="text" />
 
     <EditText
@@ -46,12 +47,18 @@
         android:layout_margin="5dip"
         android:hint="@string/esp_esptouch_pwd_hint"
         android:inputType="textPassword" />
-
-    <CheckBox
-        android:id="@+id/esptouch_isSsidHidden"
-        android:layout_width="wrap_content"
+    <EditText
+        android:id="@+id/deviceSetname"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/esp_esptouch_isSsidHidden" />
+        android:layout_margin="5dip"
+        android:inputType="textPersonName"
+        android:hint="设备名称/例如:厨房/卧室..." />
+    <!--<CheckBox-->
+        <!--android:id="@+id/esptouch_isSsidHidden"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="@string/esp_esptouch_isSsidHidden" />-->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -71,11 +78,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="1" />
 
-        <Button
-            android:id="@+id/esptouch_delete_pwd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/esp_esptouch_delete_pwd" />
+        <!--<Button-->
+            <!--android:id="@+id/esptouch_delete_pwd"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/esp_esptouch_delete_pwd" />-->
     </LinearLayout>
 
     <Button
@@ -83,7 +90,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dip"
-        android:text="@android:string/ok" />
+        android:text="配置" />
 
     <Space
         android:layout_width="match_parent"
