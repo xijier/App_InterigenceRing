@@ -6,6 +6,7 @@ package com.example.a15096.myapplication;
 
 import java.util.List;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -20,6 +22,8 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
     private List<String> mList;
     private Context mContext;
     private InnerItemOnclickListener mListener;
+    private String statusValue;
+    private int mupdatePostion = -1;
 
     public ListItemAdapter(List<String> mList, Context mContext) {
         this.mList = mList;
@@ -30,6 +34,12 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
     public int getCount() {
         // TODO 自动生成的方法存根
         return mList.size();
+    }
+
+    public void setGreenItem(int position,String value) {
+        mupdatePostion = position;
+        statusValue = value;
+        // 注意为了提高UI效率这个直接调用notifyDataSetChange（）；
     }
 
     @Override
@@ -73,8 +83,21 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
         //viewHolder.switchlight.setTag(position);
         viewHolder.checkboxlight.setTag(position);
         viewHolder.deletedevice.setTag(position);
+        viewHolder.status.setTag(position);
+
         viewHolder.deviceDecription.setText(mList.get(position));
+        if (position == mupdatePostion) {
+            viewHolder.status.setText(statusValue);
+        } else {
+            //viewHolder.status.setBackgroundColor(Color.WHITE);
+        }
         return convertView;
+    }
+
+    public void updataView(int posi, ListView listView,String value) {
+        View view = listView.getChildAt(posi);
+        ViewHolder holder = (ViewHolder) view.getTag();
+        holder.status.setText(value);
     }
 
     public final static class ViewHolder {

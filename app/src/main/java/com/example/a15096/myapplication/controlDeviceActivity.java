@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -19,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 
 import java.io.DataOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -28,6 +31,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import android.widget.AdapterView.OnItemClickListener;
@@ -50,7 +55,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private SendAsyncTask mSendAsyncTask;
     private static final String IP = "192.168.0.109";
     private static final int PORT = 8266;
-
+    private static String status = "offline";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +75,17 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                 deviceSetPage();
             }
         });
+       Button buttonTest = (Button) findViewById(R.id.buttonTest);
+       buttonTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                updateStatus(0);
+            }
+        });
+        checkStatus();
+    }
+    private void updateStatus(int targetIndex) {
+
     }
 
     /**
@@ -203,4 +219,92 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                 })
                 .create().show();
     }
+
+
+    public class StatusThread extends Thread {
+        String ip = null;
+        StatusThread (String ip)
+        {
+            this.ip = ip;
+        }
+        public void run() {
+            try {
+                Socket socket=null;
+                try {
+                    socket=new Socket(this.ip, 8266);
+                    socket.setSoTimeout(1000);
+                    //接受服务端消息并打印
+                    InputStream is=socket.getInputStream();
+                    byte b[]=new byte[1024];
+                    is.read(b);
+                    String str =new String(b);
+                    str = str.substring(0, 2);
+                    if(str.equals("is"))
+                    {
+                        status = "online";
+                    }
+                    else
+                    {
+                        status = "offline";
+                    }
+                    is.close();
+                    //os.close();
+                } catch (Exception e) {
+                    Log.e(e.getMessage(), "setClient: ", e.getCause());
+                    e.printStackTrace();
+                } finally {
+                    //操作结束，关闭socket
+                    try {
+                        socket.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+            }
+        }
+    }
+
+    private void checkStatus()
+    {
+        try {
+            List<String> ipList = new ArrayList<String>();
+            mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+            if (!mSharedPreferences.getAll().isEmpty()) {
+                Map<String, ?> map = mSharedPreferences.getAll();
+                Iterator iter = map.entrySet().iterator();
+                while (iter.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    String key = (String) entry.getKey();
+                    String value =(String) entry.getValue();
+                    ipList.add(value);
+                }
+            }
+
+            for(int i = 0 ; i <ipList.size(); i++)
+            {
+                StatusThread timer = new StatusThread(ipList.get(i));
+                timer.start();
+                timer.join();
+                if(status.equals("online"))
+                {
+                   // mAdapter.updataView(i, list_one,"online");
+                    mAdapter.setGreenItem(i,"在线");
+                }
+                else
+                {
+                    mAdapter.setGreenItem(i,"离线");
+                //    mAdapter.updataView(i, list_one,"offline");
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+    }
+
 }

@@ -28,9 +28,17 @@
                 android:background="@android:drawable/ic_input_add" />
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
+
+        <Button
+            android:id="@+id/buttonTest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Button" />
+
         <ListView
             android:id="@+id/lv"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
