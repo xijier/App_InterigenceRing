@@ -85,7 +85,8 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         checkStatus();
     }
     private void updateStatus(int targetIndex) {
-
+        String add = mSharedPreferences.getString(mDataList.get(0),"");
+        getConnectSocket("reset",add);
     }
 
     /**
@@ -211,6 +212,8 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     public void onClick(DialogInterface dialog, int which) {
                         // 清除sharedpreferences的数据
                         mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+                        String add = mSharedPreferences.getString(mDataList.get(pos),"");
+                        getConnectSocket("reset",add);
                         Editor editor = mSharedPreferences.edit();
                         editor.remove(mAdapter.getItem(pos).toString());
                         editor.commit();// 提交修改
@@ -223,8 +226,10 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
 
     public class StatusThread extends Thread {
         String ip = null;
-        StatusThread (String ip)
+        int index;
+        StatusThread (String ip,int index)
         {
+            this.index=  index;
             this.ip = ip;
         }
         public void run() {
@@ -241,6 +246,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     str = str.substring(0, 2);
                     if(str.equals("is"))
                     {
+                        mAdapter.setGreenItem(index,"在线");
                         status = "online";
                     }
                     else
@@ -285,17 +291,17 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
 
             for(int i = 0 ; i <ipList.size(); i++)
             {
-                StatusThread timer = new StatusThread(ipList.get(i));
+                StatusThread timer = new StatusThread(ipList.get(i),i);
                 timer.start();
                 timer.join();
                 if(status.equals("online"))
                 {
                    // mAdapter.updataView(i, list_one,"online");
-                    mAdapter.setGreenItem(i,"在线");
+                    //mAdapter.setGreenItem(i,"在线");
                 }
                 else
                 {
-                    mAdapter.setGreenItem(i,"离线");
+                    //mAdapter.setGreenItem(i,"离线");
                 //    mAdapter.updataView(i, list_one,"offline");
                 }
                 mAdapter.notifyDataSetChanged();
