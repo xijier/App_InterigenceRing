@@ -53,7 +53,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private SharedPreferences mSharedPreferences;
     Socket socket = null;
     private SendAsyncTask mSendAsyncTask;
-    private static final String IP = "192.168.0.109";
+    private CheckStatusAsyncTask mCheckStatusAsyncTask;
     private static final int PORT = 8266;
     private static String status = "offline";
     @Override
@@ -205,7 +205,6 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
                     }
                 })
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -296,23 +295,14 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     ipList.add(value);
                 }
             }
-
+            mCheckStatusAsyncTask = new CheckStatusAsyncTask(this,mAdapter,ipList);
+            mCheckStatusAsyncTask.execute("");
             for(int i = 0 ; i <ipList.size(); i++)
             {
-                StatusThread timer = new StatusThread(ipList.get(i),i);
-                timer.start();
-                timer.join();
-                if(status.equals("online"))
-                {
-                   // mAdapter.updataView(i, list_one,"online");
-                    //mAdapter.setGreenItem(i,"在线");
-                }
-                else
-                {
-                    //mAdapter.setGreenItem(i,"离线");
-                //    mAdapter.updataView(i, list_one,"offline");
-                }
-                mAdapter.notifyDataSetChanged();
+              //  StatusThread timer = new StatusThread(ipList.get(i),i);
+               // timer.start();
+               // timer.join();
+               // mAdapter.notifyDataSetChanged();
             }
         }
         catch (Exception e)
