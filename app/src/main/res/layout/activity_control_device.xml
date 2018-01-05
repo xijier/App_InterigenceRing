@@ -29,11 +29,11 @@
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
-        <Button
-            android:id="@+id/buttonTest"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Button" />
+        <!--<Button-->
+            <!--android:id="@+id/buttonTest"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Button" />-->
 
         <ListView
             android:id="@+id/lv"

@@ -77,13 +77,13 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                 deviceSetPage();
             }
         });
-       Button buttonTest = (Button) findViewById(R.id.buttonTest);
-       buttonTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                updateStatus(0);
-            }
-        });
+//       Button buttonTest = (Button) findViewById(R.id.buttonTest);
+//       buttonTest.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                updateStatus(0);
+//            }
+//        });
         checkStatus();
     }
     private void updateStatus(int targetIndex) {
