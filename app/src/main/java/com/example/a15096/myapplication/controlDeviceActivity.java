@@ -1,5 +1,7 @@
 package com.example.a15096.myapplication;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -154,8 +156,32 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         }
     }
 
-    public void getConnectSocket(String msg,String add,boolean isReceive)
+    public Boolean getDeleteDeviceSocket(String msg,String add,int pos,boolean isReceive)
     {
+        Boolean isSucces = false;
+        try{
+            TimeUnit.MILLISECONDS.sleep(500);
+            SetSocketThread myThread  = new SetSocketThread(add);
+            myThread.start();
+            myThread.join();
+            TimeUnit.MILLISECONDS.sleep(500);
+            if (socket.isConnected()) {
+                if (!socket.isOutputShutdown()) {
+                    DeleteAsyncTask mDeleteAsyncTask = new DeleteAsyncTask(this,socket, mAdapter,pos,isReceive);
+                    isSucces =  mDeleteAsyncTask.execute(msg).get();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+        return isSucces;
+    }
+
+    public Boolean getConnectSocket(String msg,String add,boolean isReceive)
+    {
+        Boolean isSucces = false;
         try{
             TimeUnit.MILLISECONDS.sleep(500);
             SetSocketThread myThread  = new SetSocketThread(add);
@@ -165,7 +191,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
             if (socket.isConnected()) {
                 if (!socket.isOutputShutdown()) {
                     mSendAsyncTask = new SendAsyncTask(socket,isReceive);
-                    mSendAsyncTask.execute(msg);
+                    isSucces =  mSendAsyncTask.execute(msg).get();
                 }
             }
         }
@@ -173,6 +199,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         {
 
         }
+        return isSucces;
     }
 
     public class SetSocketThread extends Thread {
@@ -211,73 +238,25 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 清除sharedpreferences的数据
+
                         mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
                         String add = mSharedPreferences.getString(mDataList.get(pos),"");
-                        getConnectSocket("reset",add,false);
-                        Editor editor = mSharedPreferences.edit();
-                        editor.remove(mAdapter.getItem(pos).toString());
-                        editor.commit();// 提交修改
-                        mAdapter.deleteItem(pos);
+
+                        Boolean isSuccess= getDeleteDeviceSocket("reset",add,pos,false);
+                        if(isSuccess)
+                        {
+                            Editor editor = mSharedPreferences.edit();
+                            editor.remove(mAdapter.getItem(pos).toString());
+                            editor.commit();// 提交修改
+                            mAdapter.deleteItem(pos);
+                        }
+                        else
+                        {
+                            Toast.makeText(mContext,"设备已离线，请关闭重试", Toast.LENGTH_LONG).show();
+                        }
                     }
                 })
                 .create().show();
-    }
-
-
-    public class StatusThread extends Thread {
-        String ip = null;
-        int index;
-        StatusThread (String ip,int index)
-        {
-            this.index=  index;
-            this.ip = ip;
-        }
-        public void run() {
-            try {
-                Socket socket=null;
-                try {
-                    socket=new Socket(this.ip, 8266);
-                    socket.setSoTimeout(1000);
-                    //接受服务端消息并打印
-                    InputStream is=socket.getInputStream();
-                    byte b[]=new byte[1024];
-                    is.read(b);
-                    String str =new String(b);
-                    str = str.substring(0, 4);
-                    if(str.equals("ison"))
-                    {
-                        mAdapter.setStatusItem(index,"在线",true,true);
-                        status = "开";
-                    }
-                    else if(str.equals("isof"))
-                    {
-                        mAdapter.setStatusItem(index,"在线",false,true);
-                        status = "关";
-                    }
-                    else
-                    {
-
-                    }
-                    is.close();
-                    //os.close();
-                } catch (Exception e) {
-                    mAdapter.setStatusItem(index,"离线",false,false);
-                    status = "不可用";
-                    Log.e(e.getMessage(), "setClient: ", e.getCause());
-                    e.printStackTrace();
-                } finally {
-                    //操作结束，关闭socket
-                    try {
-                        socket.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-            }
-        }
     }
 
     private void checkStatus()
@@ -297,13 +276,6 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
             }
             mCheckStatusAsyncTask = new CheckStatusAsyncTask(this,mAdapter,ipList);
             mCheckStatusAsyncTask.execute("");
-            for(int i = 0 ; i <ipList.size(); i++)
-            {
-              //  StatusThread timer = new StatusThread(ipList.get(i),i);
-               // timer.start();
-               // timer.join();
-               // mAdapter.notifyDataSetChanged();
-            }
         }
         catch (Exception e)
         {

@@ -94,6 +94,7 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
             viewHolder.status.setText(statusValue);
             viewHolder.checkboxlight.setChecked(isCheckLight);
             viewHolder.checkboxlight.setEnabled(isEnableLight);
+            viewHolder.deletedevice.setEnabled(isEnableLight);
         } else {
             //viewHolder.status.setBackgroundColor(Color.WHITE);
         }

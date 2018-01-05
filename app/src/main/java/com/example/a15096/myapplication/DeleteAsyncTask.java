@@ -1,35 +1,68 @@
 package com.example.a15096.myapplication;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
 /**
- * Created by 15096 on 2017/12/24.
+ * Created by 15096 on 2018/1/6.
  */
 
-public class SendAsyncTask extends AsyncTask<String, Void, Boolean> {
+public class DeleteAsyncTask extends AsyncTask<String, Void, Boolean> {
 
     //这里是连接ESP8266的IP和端口号，IP是通过指令在单片机开发板查询到，而端口号可以自行设置，也可以使用默认的，333就是默认的
     private Socket client = null;
     private PrintStream out = null;
     private boolean isReceive = false;
-    SendAsyncTask(Socket client,boolean isReceive)
+    private ProgressDialog mDialog;
+    private ListItemAdapter mAdapter;
+    private Activity mActivity;
+    private int mpos;
+    DeleteAsyncTask(Activity activity,Socket client,ListItemAdapter Adapter,int pos,boolean isReceive)
     {
         this.client = client;
         this.isReceive= isReceive;
+        mAdapter= Adapter;
+        mActivity = activity;
+        mpos = pos;
     }
+
+    @Override
+    protected void onPreExecute()
+    {
+        mDialog = new ProgressDialog(mActivity);
+        mDialog.setMessage("正在删除，请稍后...");
+        mDialog.setCanceledOnTouchOutside(false);
+        //  mDialog.setOnCancelListener(this);
+        mDialog.show();
+    }
+
+    @Override
+    protected void onPostExecute(final Boolean result)
+    {
+        mDialog.dismiss();
+        //  String add1 = result.getInetAddress().toString();
+
+        if(result==false)
+        {
+            mAdapter.setStatusItem(mpos,"离线",false,false);
+            mAdapter.notifyDataSetChanged();
+        }
+        // Toast.makeText(mActivity, toastMsg, Toast.LENGTH_LONG).show();
+    }
+
     @Override
     protected Boolean doInBackground(String... params) {
         String str = params[0];
         try {
-           // setServer(str);
             boolean isSuccess =setClient(str);
             return  isSuccess;
         } catch (Exception e) {
@@ -39,46 +72,10 @@ public class SendAsyncTask extends AsyncTask<String, Void, Boolean> {
         return null;
     }
 
-    protected void setServer(String msg)
-    {
-        ServerSocket serverSocket=null;
-        Socket socket=null;
-       // String msg="a";
-        try {
-            //构造ServerSocket实例，指定端口监听客户端的连接请求
-            serverSocket=new ServerSocket(8266);
-            String ip =  serverSocket.getLocalSocketAddress().toString();
-            //建立跟客户端的连接
-            socket=serverSocket.accept();
-            //向客户端发送消息
-            OutputStream os=socket.getOutputStream();
-            os.write(msg.getBytes());
-            InputStream is=socket.getInputStream();
-            //接受客户端的响应
-            byte[] b=new byte[1024];
-            is.read(b);
-            String str = new String(b);
-            System.out.println(str.trim()+" "+str.length());
-            serverSocket.close();
-            socket.close();
-        } catch (Exception e) {
-            Log.e(e.getMessage(), "setServer: ", e.getCause());
-            e.printStackTrace();
-        } finally {
-            //操作结束，关闭socket
-            try {
-                serverSocket.close();
-                socket.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     protected  boolean setClient(String msg)
     {
         boolean isSuccess = false;
-      // Socket socket=null;
+        // Socket socket=null;
         try {
             //socket=new Socket("192.168.0.109", 8266);
             //接受服务端消息并打印
