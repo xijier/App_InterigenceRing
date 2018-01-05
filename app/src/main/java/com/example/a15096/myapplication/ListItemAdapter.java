@@ -24,6 +24,8 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
     private InnerItemOnclickListener mListener;
     private String statusValue;
     private int mupdatePostion = -1;
+    private  boolean isCheckLight = false;
+    private  boolean isEnableLight = true;
 
     public ListItemAdapter(List<String> mList, Context mContext) {
         this.mList = mList;
@@ -36,9 +38,11 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
         return mList.size();
     }
 
-    public void setGreenItem(int position,String value) {
+    public void setStatusItem(int position,String value,boolean isCheck,boolean isEnable) {
         mupdatePostion = position;
         statusValue = value;
+        isCheckLight = isCheck;
+        isEnableLight = isEnable;
         // 注意为了提高UI效率这个直接调用notifyDataSetChange（）；
     }
 
@@ -88,6 +92,8 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
         viewHolder.deviceDecription.setText(mList.get(position));
         if (position == mupdatePostion) {
             viewHolder.status.setText(statusValue);
+            viewHolder.checkboxlight.setChecked(isCheckLight);
+            viewHolder.checkboxlight.setEnabled(isEnableLight);
         } else {
             //viewHolder.status.setBackgroundColor(Color.WHITE);
         }

@@ -85,8 +85,9 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         checkStatus();
     }
     private void updateStatus(int targetIndex) {
-        String add = mSharedPreferences.getString(mDataList.get(0),"");
-        getConnectSocket("reset",add);
+      // String add = mSharedPreferences.getString(mDataList.get(0),"");
+      // getConnectSocket("check",add,true);
+
     }
 
     /**
@@ -130,11 +131,11 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     try{
                         if(checklight.isChecked())
                         {
-                            getConnectSocket("on",add);
+                            getConnectSocket("on",add,false);
                         }
                         else
                         {
-                            getConnectSocket("off",add);
+                            getConnectSocket("off",add,false);
                         }
 
                     }catch (Exception e)
@@ -153,7 +154,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         }
     }
 
-    public void getConnectSocket(String msg,String add)
+    public void getConnectSocket(String msg,String add,boolean isReceive)
     {
         try{
             TimeUnit.MILLISECONDS.sleep(500);
@@ -163,7 +164,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
             TimeUnit.MILLISECONDS.sleep(500);
             if (socket.isConnected()) {
                 if (!socket.isOutputShutdown()) {
-                    mSendAsyncTask = new SendAsyncTask(socket);
+                    mSendAsyncTask = new SendAsyncTask(socket,isReceive);
                     mSendAsyncTask.execute(msg);
                 }
             }
@@ -213,7 +214,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                         // 清除sharedpreferences的数据
                         mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
                         String add = mSharedPreferences.getString(mDataList.get(pos),"");
-                        getConnectSocket("reset",add);
+                        getConnectSocket("reset",add,false);
                         Editor editor = mSharedPreferences.edit();
                         editor.remove(mAdapter.getItem(pos).toString());
                         editor.commit();// 提交修改
@@ -243,19 +244,26 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     byte b[]=new byte[1024];
                     is.read(b);
                     String str =new String(b);
-                    str = str.substring(0, 2);
-                    if(str.equals("is"))
+                    str = str.substring(0, 4);
+                    if(str.equals("ison"))
                     {
-                        mAdapter.setGreenItem(index,"在线");
-                        status = "online";
+                        mAdapter.setStatusItem(index,"在线",true,true);
+                        status = "开";
+                    }
+                    else if(str.equals("isof"))
+                    {
+                        mAdapter.setStatusItem(index,"在线",false,true);
+                        status = "关";
                     }
                     else
                     {
-                        status = "offline";
+
                     }
                     is.close();
                     //os.close();
                 } catch (Exception e) {
+                    mAdapter.setStatusItem(index,"离线",false,false);
+                    status = "不可用";
                     Log.e(e.getMessage(), "setClient: ", e.getCause());
                     e.printStackTrace();
                 } finally {

@@ -19,9 +19,11 @@ public class SendAsyncTask extends AsyncTask<String, Void, Void> {
     //这里是连接ESP8266的IP和端口号，IP是通过指令在单片机开发板查询到，而端口号可以自行设置，也可以使用默认的，333就是默认的
     private Socket client = null;
     private PrintStream out = null;
-    SendAsyncTask(Socket client)
+    private boolean isReceive = false;
+    SendAsyncTask(Socket client,boolean isReceive)
     {
         this.client = client;
+        this.isReceive= isReceive;
     }
     @Override
     protected Void doInBackground(String... params) {
@@ -78,14 +80,20 @@ public class SendAsyncTask extends AsyncTask<String, Void, Void> {
         try {
             //socket=new Socket("192.168.0.109", 8266);
             //接受服务端消息并打印
-            //InputStream is=socket.getInputStream();
-            //byte b[]=new byte[1024];
-            //is.read(b);;
+            if(isReceive)
+            {
+                InputStream is=client.getInputStream();
+                byte b[]=new byte[1024];
+                is.read(b);
+                String str = new String(b);
+                is.close();
+            }
             //给服务端发送响应信息
             OutputStream os=client.getOutputStream();
             os.write(msg.getBytes());
             //is.close();
             os.close();
+
         } catch (Exception e) {
             Log.e(e.getMessage(), "setClient: ", e.getCause());
             e.printStackTrace();
