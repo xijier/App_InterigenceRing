@@ -20,7 +20,7 @@ public class SendAsyncTask extends AsyncTask<String, Void, Boolean> {
     private Socket client = null;
     private PrintStream out = null;
     private boolean isReceive = false;
-    SendAsyncTask(Socket client,boolean isReceive)
+    public SendAsyncTask(Socket client,boolean isReceive)
     {
         this.client = client;
         this.isReceive= isReceive;
@@ -85,7 +85,7 @@ public class SendAsyncTask extends AsyncTask<String, Void, Boolean> {
             if(isReceive)
             {
                 InputStream is=client.getInputStream();
-                byte b[]=new byte[1024];
+                byte[] b  = new byte[is.available()];
                 is.read(b);
                 String str = new String(b);
                 is.close();

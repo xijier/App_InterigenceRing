@@ -26,4 +26,13 @@
         </item><!-- 窗口样式Dialog -->
         <item name="android:backgroundDimEnabled">true</item><!--模糊-->
     </style>
+
+    <style name="NavPage">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center_horizontal</item>
+        <!-- <item name="android:background">@drawable/nav_page</item> -->
+    </style>
+
 </resources>

@@ -41,10 +41,24 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import android.os.Handler;
 import android.widget.Toast;
+
+import com.example.a15096.myapplication.com.example.a15096.myapplication.OAUTH2.Constants;
+import com.example.a15096.myapplication.com.example.a15096.myapplication.OAUTH2.SendToWXActivity;
+import com.example.a15096.myapplication.com.example.a15096.myapplication.OAUTH2.weibo.WBAuthActivity;
+import com.sina.weibo.sdk.WbSdk;
+import com.sina.weibo.sdk.auth.AccessTokenKeeper;
+import com.sina.weibo.sdk.auth.AuthInfo;
+import com.sina.weibo.sdk.auth.Oauth2AccessToken;
+import com.sina.weibo.sdk.auth.WbConnectErrorMessage;
+import com.sina.weibo.sdk.auth.sso.SsoHandler;
+import com.tencent.mm.opensdk.modelmsg.SendAuth;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 import org.json.JSONObject;
 
@@ -68,6 +82,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private int count = LOGIN_CHANCES;
     //多次认证失败时需要等待的时间
     private float WAIT_TIME = 30000L;
+
+    private SsoHandler mSsoHandler;
+    private static final String TAG = "weibosdk";
+    /** 显示认证后的信息，如 AccessToken */
+   // private TextView mTokenText;
+    /** 封装了 "access_token"，"expires_in"，"refresh_token"，并提供了他们的管理功能  */
+    private Oauth2AccessToken mAccessToken;
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -114,7 +135,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
+                        attemptLogin();
                     return true;
                 }
                 return false;
@@ -135,6 +156,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 deviceSetPage();
             }
         });
+
+        Button button_weibo = (Button) findViewById(R.id.button_weibo);
+        button_weibo.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                weiboSetPage();
+            }
+        });
+
         Button email_register_button = (Button) findViewById(R.id.email_register_button);
         email_register_button.setOnClickListener(new OnClickListener() {
             @Override
@@ -199,6 +229,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     }
 
+    private void weiboSetPage()
+    {
+       // WbSdk.install(this,new AuthInfo(this, Constants.APP_KEY, Constants.REDIRECT_URL, Constants.SCOPE));
+        //mSsoHandler = new SsoHandler(this);
+        //mSsoHandler.authorizeClientSso(new LoginActivity.SelfWbAuthListener());
+        Intent intent=new Intent(this,WBAuthActivity.class);
+        startActivity(intent);
+    }
+
     /**
      * Device Set page
      */
@@ -206,6 +245,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
         Intent intent=new Intent(this,controlDeviceActivity.class);
         startActivity(intent);
+        //Intent intent=new Intent(this,SendToWXActivity.class);
+        //startActivity(intent);
     }
 
     /**
@@ -510,6 +551,56 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 return status;
             }
         }
+    }
+
+    private class SelfWbAuthListener implements com.sina.weibo.sdk.auth.WbAuthListener{
+        @Override
+        public void onSuccess(final Oauth2AccessToken token) {
+            LoginActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mAccessToken = token;
+                    if (mAccessToken.isSessionValid()) {
+                        // 显示 Token
+                        updateTokenView(false);
+                        // 保存 Token 到 SharedPreferences
+                        AccessTokenKeeper.writeAccessToken(LoginActivity.this, mAccessToken);
+                        Toast.makeText(LoginActivity.this,
+                                R.string.weibosdk_demo_toast_auth_success, Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void cancel() {
+            Toast.makeText(LoginActivity.this,
+                    R.string.weibosdk_demo_toast_auth_canceled, Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onFailure(WbConnectErrorMessage errorMessage) {
+            Toast.makeText(LoginActivity.this, errorMessage.getErrorMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * 显示当前 Token 信息。
+     *
+     * @param hasExisted 配置文件中是否已存在 token 信息并且合法
+     */
+    private void updateTokenView(boolean hasExisted) {
+        String date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(
+                new java.util.Date(mAccessToken.getExpiresTime()));
+        String format = getString(R.string.weibosdk_demo_token_to_string_format_1);
+       // mTokenText.setText(String.format(format, mAccessToken.getToken(), date));
+
+        String message = String.format(format, mAccessToken.getToken(), date);
+        if (hasExisted) {
+            message = getString(R.string.weibosdk_demo_token_has_existed) + "\n" + message;
+        }
+        //mTokenText.setText(message);
     }
 }
 

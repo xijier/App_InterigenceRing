@@ -18,8 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,7 +27,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,9 +34,14 @@ import com.example.a15096.myapplication.R;
 import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.esptouch.EsptouchTask;
 import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.esptouch.IEsptouchResult;
 
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Timer;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class SmartConfigActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener
 ,AdapterView.OnItemSelectedListener
@@ -47,7 +50,11 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
     private static final int REQUEST_CODE_ACCESS_COARSE_LOCATION = 1;
     private SharedPreferences mShared;
     private final static String PREFRENCE_FILE_KEY = "com.example.a15096.shared_preferences";
+    private final static String PREFRENCE_Device_KEY = "com.example.a15096.shared_preferences_devicename";
     private SharedPreferences mSharedPreferences;
+    private SharedPreferences mSharedPreferencesDeviceName;
+    Socket socket = null;
+    private SendAsyncGetIdTask mSendAsyncTask;
 
     private TextView mCurrentSsidTV;
    // private Spinner mConfigureSP;
@@ -177,38 +184,197 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         {
             address = address.substring(1, address.length());
         }
-        Long timeSpan= System.currentTimeMillis();
+
+        String deviceId = getConnectSocket("getId",address,true);
+
+ /*       Long timeSpan= System.currentTimeMillis();
         TextView deviceSetname = (TextView) findViewById(R.id.deviceSetname);
         TextView wifipassword = (TextView) findViewById(R.id.esptouch_pwd);
         mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+
+        mSharedPreferencesDeviceName = getSharedPreferences(PREFRENCE_Device_KEY, Context.MODE_PRIVATE);
         String deviceName = deviceSetname.getText().toString();
-        if(!mSharedPreferences.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
+
+        if(!mSharedPreferencesDeviceName.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
         {
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
             editor.putString(deviceSetname.getText().toString(), address);
             editor.commit();
         }
         else if(deviceName.isEmpty())
         {
             int i = 1;
-            while(mSharedPreferences.getAll().containsKey(deviceName+String.valueOf(i)))
+            while(mSharedPreferencesDeviceName.getAll().containsKey(deviceName+String.valueOf(i)))
             {
                 i++;
             }
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.putString(deviceName+String.valueOf(i), address);
+            deviceName = deviceName+String.valueOf(i);
+            SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+            editor.putString(deviceName, address);
             editor.commit();
         }
         else
         {
             int i = 1;
-            while(mSharedPreferences.getAll().containsKey("智能环设备"+String.valueOf(i)))
+            while(mSharedPreferencesDeviceName.getAll().containsKey("智能环设备"+String.valueOf(i)))
             {
                 i++;
             }
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.putString("智能环设备"+String.valueOf(i),address);
+            deviceName = "智能环设备"+String.valueOf(i);
+            SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+            editor.putString(deviceName,address);
             editor.commit();
+        }
+
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(deviceSetname.getText().toString(), address);
+        Set<String> setValue = new HashSet<String>();
+        setValue.add("deviceName:"+deviceName);
+        setValue.add("address:"+address);
+        editor.putStringSet(deviceId,setValue);
+        editor.commit();*/
+    }
+
+    public String getConnectSocket(String msg,String address,boolean isReceive)
+    {
+        String deviceId = "";
+        try{
+            TimeUnit.MILLISECONDS.sleep(700);
+            SetSocketThreadID myThread  = new SetSocketThreadID(address);
+            myThread.start();
+            myThread.join();
+            TimeUnit.MILLISECONDS.sleep(500);
+            if (socket.isConnected()) {
+                   mSendAsyncTask = new SendAsyncGetIdTask(socket,address,isReceive);
+                   deviceId =  mSendAsyncTask.execute(msg).get();
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+        return deviceId;
+    }
+
+    public class SetSocketThreadID extends Thread {
+        String ip = null;
+        SetSocketThreadID(String ip)
+        {
+            this.ip = ip;
+        }
+        public void run() {
+            try {
+                socket  =new Socket(this.ip, 8266);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+            }
+        }
+    }
+
+    public class SendAsyncGetIdTask extends AsyncTask<String, Void, String> {
+        //这里是连接ESP8266的IP和端口号，IP是通过指令在单片机开发板查询到，而端口号可以自行设置，也可以使用默认的，333就是默认的
+        private Socket client = null;
+        private PrintStream out = null;
+        private boolean isReceive = false;
+        private String address;
+        public SendAsyncGetIdTask(Socket client,String address,boolean isReceive)
+        {
+            this.client = client;
+            this.isReceive= isReceive;
+            this.address= address;
+        }
+        @Override
+        protected String doInBackground(String... params) {
+            String str = params[0];
+            try {
+                String deviceId =  setClient(str);
+                return  deviceId;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(final String deviceId) {
+            //mAuthTask = null;
+            //showProgress(false);
+            Long timeSpan= System.currentTimeMillis();
+            TextView deviceSetname = (TextView) findViewById(R.id.deviceSetname);
+            TextView wifipassword = (TextView) findViewById(R.id.esptouch_pwd);
+            mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+
+            mSharedPreferencesDeviceName = getSharedPreferences(PREFRENCE_Device_KEY, Context.MODE_PRIVATE);
+            String deviceName = deviceSetname.getText().toString();
+
+            if(!mSharedPreferencesDeviceName.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
+            {
+                SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+                editor.putString(deviceSetname.getText().toString(), address);
+                editor.commit();
+            }
+            else if(deviceName.isEmpty())
+            {
+                int i = 1;
+                while(mSharedPreferencesDeviceName.getAll().containsKey(deviceName+String.valueOf(i)))
+                {
+                    i++;
+                }
+                deviceName = deviceName+String.valueOf(i);
+                SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+                editor.putString(deviceName, address);
+                editor.commit();
+            }
+            else
+            {
+                int i = 1;
+                while(mSharedPreferencesDeviceName.getAll().containsKey("智能环设备"+String.valueOf(i)))
+                {
+                    i++;
+                }
+                deviceName = "智能环设备"+String.valueOf(i);
+                SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+                editor.putString(deviceName,address);
+                editor.commit();
+            }
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            Set<String> setValue = new HashSet<String>();
+            setValue.add("deviceName:"+deviceName);
+            setValue.add("address:"+address);
+            editor.putStringSet(deviceId,setValue);
+            editor.commit();
+        }
+
+        @Override
+        protected void onCancelled() {
+           // mAuthTask = null;
+            //showProgress(false);
+        }
+
+        protected String setClient(String msg)
+        {
+            String deviceId = "";
+            try {
+                InputStream is=client.getInputStream();
+                byte[] b  = new byte[is.available()];
+                is.read(b);
+                deviceId = new String(b);
+                is.close();
+                return  deviceId;
+            } catch (Exception e) {
+                Log.e(e.getMessage(), "setClient: ", e.getCause());
+                e.printStackTrace();
+                return  deviceId;
+            } finally {
+                //操作结束，关闭socket
+                try {
+                    client.close();
+                    return  deviceId;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -269,11 +435,14 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
 
         private final String mSsid;
 
+        private String passwordId;
+
         public ConfigureTask(Activity activity, String apSsid, String apBssid, String password, boolean isSsidHidden)
         {
             mActivity = activity;
             mSsid = apSsid;
             mTask = new EsptouchTask(apSsid, apBssid, password, isSsidHidden, SmartConfigActivity.this);
+            passwordId = password;
         }
 
         @Override
@@ -302,6 +471,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
             {
                 String add = result.getInetAddress().toString();
                 adddeviceSet(add);
+
                 toastMsg = R.string.esp_esptouch_result_suc;
             }
             else if (result.isCancelled())
@@ -406,5 +576,4 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
     public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
-
 }

@@ -28,11 +28,13 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -52,9 +54,12 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private Context mContext = null;
     /***数据持久化**/
     private final static String PREFRENCE_FILE_KEY = "com.example.a15096.shared_preferences";
+    private final static String PREFRENCE_Device_KEY = "com.example.a15096.shared_preferences_devicename";
+    private SharedPreferences mSharedPreferencesDeviceName;
     private SharedPreferences mSharedPreferences;
     Socket socket = null;
     private SendAsyncTask mSendAsyncTask;
+    private SendAsyncMqttTask mSendAsyncMqttTask;
     private CheckStatusAsyncTask mCheckStatusAsyncTask;
     private static final int PORT = 8266;
     private static String status = "offline";
@@ -108,9 +113,9 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     }
 
     private void getPreferencesData() {
-        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
-        if (!mSharedPreferences.getAll().isEmpty()) {
-            Map<String, ?> map = mSharedPreferences.getAll();
+        mSharedPreferencesDeviceName = getSharedPreferences(PREFRENCE_Device_KEY, Context.MODE_PRIVATE);
+        if (!mSharedPreferencesDeviceName.getAll().isEmpty()) {
+            Map<String, ?> map = mSharedPreferencesDeviceName.getAll();
             Iterator iter = map.entrySet().iterator();
             while (iter.hasNext()) {
                 Map.Entry entry = (Map.Entry) iter.next();
@@ -126,18 +131,42 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         position = (Integer) v.getTag();
         switch (v.getId()) {
             case R.id.checkboxlight:
-
-                String add = mSharedPreferences.getString(mDataList.get(position),"");
-              //  Switch sw = (Switch) v.findViewById(R.id.switchlight);
+                String name =  mDataList.get(position);
+                String add = mSharedPreferencesDeviceName.getString(name,"");
+                String deviceId = "";
+                if (!mSharedPreferences.getAll().isEmpty()) {
+                    Map<String, ?> map = mSharedPreferences.getAll();
+                    Iterator iter = map.entrySet().iterator();
+                    while (iter.hasNext()) {
+                        Map.Entry entry = (Map.Entry) iter.next();
+                        String key = (String) entry.getKey();
+                        Set<String> set=new HashSet<String>(mSharedPreferences.getStringSet(key, new HashSet<String>()));
+                        for (String str : set) {
+                            if(str.contains("deviceName:"))
+                            {
+                               String temp = str.substring("deviceName:".length(), str.length());
+                                if(temp.equals(name))
+                                {
+                                    deviceId = key;
+                                  //  break;
+                                }
+                            }
+                        }
+                    }
+                }
+                //  Switch sw = (Switch) v.findViewById(R.id.switchlight);
                 CheckBox checklight = (CheckBox) v.findViewById(R.id.checkboxlight);
                     try{
                         if(checklight.isChecked())
                         {
-                            getConnectSocket("on",add,false);
+                         //   getConnectSocket("on",add,false);
+                            getConnectMqtt("on",deviceId,false);
+
                         }
                         else
                         {
-                            getConnectSocket("off",add,false);
+                            //getConnectSocket("on",add,false);
+                            getConnectMqtt("off",deviceId,false);
                         }
 
                     }catch (Exception e)
@@ -171,6 +200,30 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     isSucces =  mDeleteAsyncTask.execute(msg).get();
                 }
             }
+        }
+        catch (Exception e)
+        {
+
+        }
+        return isSucces;
+    }
+
+    public Boolean getConnectMqtt(String msg,String deviceId,boolean isReceive)
+    {
+        Boolean isSucces = false;
+        try{
+            TimeUnit.MILLISECONDS.sleep(500);
+
+           // SetSocketThread myThread  = new SetSocketThread(add);
+            //myThread.start();
+            //myThread.join();
+            //TimeUnit.MILLISECONDS.sleep(500);
+            //if (socket.isConnected()) {
+             //   if (!socket.isOutputShutdown()) {
+                    mSendAsyncMqttTask = new SendAsyncMqttTask(deviceId,isReceive);
+                    isSucces =  mSendAsyncMqttTask.execute(msg).get();
+            //    }
+           // }
         }
         catch (Exception e)
         {
@@ -263,9 +316,10 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     {
         try {
             List<String> ipList = new ArrayList<String>();
+            mSharedPreferencesDeviceName = getSharedPreferences(PREFRENCE_Device_KEY, Context.MODE_PRIVATE);
             mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
-            if (!mSharedPreferences.getAll().isEmpty()) {
-                Map<String, ?> map = mSharedPreferences.getAll();
+            if (!mSharedPreferencesDeviceName.getAll().isEmpty()) {
+                Map<String, ?> map = mSharedPreferencesDeviceName.getAll();
                 Iterator iter = map.entrySet().iterator();
                 while (iter.hasNext()) {
                     Map.Entry entry = (Map.Entry) iter.next();
@@ -274,8 +328,8 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     ipList.add(value);
                 }
             }
-            mCheckStatusAsyncTask = new CheckStatusAsyncTask(this,mAdapter,ipList);
-            mCheckStatusAsyncTask.execute("");
+           // mCheckStatusAsyncTask = new CheckStatusAsyncTask(this,mAdapter,ipList);
+            //mCheckStatusAsyncTask.execute("");
         }
         catch (Exception e)
         {
