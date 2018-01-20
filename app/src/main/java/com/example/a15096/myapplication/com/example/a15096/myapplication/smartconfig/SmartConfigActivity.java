@@ -35,6 +35,7 @@ import com.example.a15096.myapplication.com.example.a15096.myapplication.smartco
 import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.esptouch.IEsptouchResult;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -187,67 +188,67 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
 
         String deviceId = getConnectSocket("getId",address,true);
 
- /*       Long timeSpan= System.currentTimeMillis();
+/*
+        Long timeSpan= System.currentTimeMillis();
         TextView deviceSetname = (TextView) findViewById(R.id.deviceSetname);
         TextView wifipassword = (TextView) findViewById(R.id.esptouch_pwd);
         mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
 
-        mSharedPreferencesDeviceName = getSharedPreferences(PREFRENCE_Device_KEY, Context.MODE_PRIVATE);
         String deviceName = deviceSetname.getText().toString();
 
-        if(!mSharedPreferencesDeviceName.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
+        if(!mSharedPreferences.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
         {
-            SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
             editor.putString(deviceSetname.getText().toString(), address);
             editor.commit();
         }
         else if(deviceName.isEmpty())
         {
             int i = 1;
-            while(mSharedPreferencesDeviceName.getAll().containsKey(deviceName+String.valueOf(i)))
+            while(mSharedPreferences.getAll().containsKey(deviceName+String.valueOf(i)))
             {
                 i++;
             }
             deviceName = deviceName+String.valueOf(i);
-            SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
             editor.putString(deviceName, address);
             editor.commit();
         }
         else
         {
             int i = 1;
-            while(mSharedPreferencesDeviceName.getAll().containsKey("智能环设备"+String.valueOf(i)))
+            while(mSharedPreferences.getAll().containsKey("智能环设备"+String.valueOf(i)))
             {
                 i++;
             }
             deviceName = "智能环设备"+String.valueOf(i);
-            SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
             editor.putString(deviceName,address);
             editor.commit();
         }
-
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(deviceSetname.getText().toString(), address);
-        Set<String> setValue = new HashSet<String>();
-        setValue.add("deviceName:"+deviceName);
-        setValue.add("address:"+address);
-        editor.putStringSet(deviceId,setValue);
-        editor.commit();*/
+*/
+//        SharedPreferences.Editor editor = mSharedPreferences.edit();
+//        editor.putString(deviceSetname.getText().toString(), address);
+//        Set<String> setValue = new HashSet<String>();
+//        setValue.add("deviceName:"+deviceName);
+//        setValue.add("address:"+address);
+//        editor.putStringSet(deviceId,setValue);
+//        editor.commit();
     }
 
     public String getConnectSocket(String msg,String address,boolean isReceive)
     {
         String deviceId = "";
         try{
-            TimeUnit.MILLISECONDS.sleep(700);
-            SetSocketThreadID myThread  = new SetSocketThreadID(address);
-            myThread.start();
-            myThread.join();
-            TimeUnit.MILLISECONDS.sleep(500);
-            if (socket.isConnected()) {
+          //  TimeUnit.MILLISECONDS.sleep(2000);
+          //  SetSocketThreadID myThread  = new SetSocketThreadID(address);
+          //  myThread.start();
+          //  myThread.join();
+          //  TimeUnit.MILLISECONDS.sleep(500);
+         //   if (socket.isConnected()) {
                    mSendAsyncTask = new SendAsyncGetIdTask(socket,address,isReceive);
                    deviceId =  mSendAsyncTask.execute(msg).get();
-            }
+       //     }
         }
         catch (Exception e)
         {
@@ -355,12 +356,37 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         protected String setClient(String msg)
         {
             String deviceId = "";
+            Socket newclient = null;
             try {
-                InputStream is=client.getInputStream();
-                byte[] b  = new byte[is.available()];
-                is.read(b);
-                deviceId = new String(b);
+                TimeUnit.MILLISECONDS.sleep(1000);
+                newclient  =new Socket(address, 8266);
+                //给服务端发送响应信息
+                OutputStream os=newclient.getOutputStream();
+                os.write(msg.getBytes());
+                //服务器回应
+                InputStream is=newclient.getInputStream();
+                String str = "";
+                while(true)
+                {
+                    byte[] b  = new byte[is.available()];
+                    is.read(b);
+                    deviceId = new String(b);
+                    if(deviceId.length()>0)
+                    {
+                        for(int i =0; i< deviceId.length() ; i++)
+                        {
+                           char value =   deviceId.charAt(i);
+                            if(value!=0)
+                            {
+                                str += String.valueOf(value);
+                            }
+                        }
+                        break;
+                    }
+                }
+                deviceId =str;
                 is.close();
+                os.close();
                 return  deviceId;
             } catch (Exception e) {
                 Log.e(e.getMessage(), "setClient: ", e.getCause());

@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Iterator;
@@ -44,6 +45,7 @@ import android.widget.Toast;
 
 import com.example.a15096.myapplication.ListItemAdapter.InnerItemOnclickListener;
 import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.SmartConfigActivity;
+import com.example.a15096.myapplication.mqtt.CheckStatusAsyncMqttTask;
 
 public class controlDeviceActivity extends AppCompatActivity implements InnerItemOnclickListener,
         OnItemClickListener {
@@ -61,6 +63,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private SendAsyncTask mSendAsyncTask;
     private SendAsyncMqttTask mSendAsyncMqttTask;
     private CheckStatusAsyncTask mCheckStatusAsyncTask;
+    private CheckStatusAsyncMqttTask mCheckStatusAsyncMqttTask;
     private static final int PORT = 8266;
     private static String status = "offline";
     @Override
@@ -69,6 +72,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         setContentView(R.layout.activity_control_device);
         mContext = controlDeviceActivity.this;
         mDataList = new ArrayList<String>();
+        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
         initView();
         getPreferencesData();
         mAdapter = new ListItemAdapter(mDataList, this);
@@ -82,21 +86,8 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                 deviceSetPage();
             }
         });
-//       Button buttonTest = (Button) findViewById(R.id.buttonTest);
-//       buttonTest.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                updateStatus(0);
-//            }
-//        });
         checkStatus();
     }
-    private void updateStatus(int targetIndex) {
-      // String add = mSharedPreferences.getString(mDataList.get(0),"");
-      // getConnectSocket("check",add,true);
-
-    }
-
     /**
      * Device Set page
      */
@@ -113,6 +104,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     }
 
     private void getPreferencesData() {
+
         mSharedPreferencesDeviceName = getSharedPreferences(PREFRENCE_Device_KEY, Context.MODE_PRIVATE);
         if (!mSharedPreferencesDeviceName.getAll().isEmpty()) {
             Map<String, ?> map = mSharedPreferencesDeviceName.getAll();
@@ -131,42 +123,21 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         position = (Integer) v.getTag();
         switch (v.getId()) {
             case R.id.checkboxlight:
+
                 String name =  mDataList.get(position);
                 String add = mSharedPreferencesDeviceName.getString(name,"");
-                String deviceId = "";
-                if (!mSharedPreferences.getAll().isEmpty()) {
-                    Map<String, ?> map = mSharedPreferences.getAll();
-                    Iterator iter = map.entrySet().iterator();
-                    while (iter.hasNext()) {
-                        Map.Entry entry = (Map.Entry) iter.next();
-                        String key = (String) entry.getKey();
-                        Set<String> set=new HashSet<String>(mSharedPreferences.getStringSet(key, new HashSet<String>()));
-                        for (String str : set) {
-                            if(str.contains("deviceName:"))
-                            {
-                               String temp = str.substring("deviceName:".length(), str.length());
-                                if(temp.equals(name))
-                                {
-                                    deviceId = key;
-                                  //  break;
-                                }
-                            }
-                        }
-                    }
-                }
-                //  Switch sw = (Switch) v.findViewById(R.id.switchlight);
+                String deviceId = getDeviceId(name);
                 CheckBox checklight = (CheckBox) v.findViewById(R.id.checkboxlight);
                     try{
                         if(checklight.isChecked())
                         {
-                         //   getConnectSocket("on",add,false);
-                            getConnectMqtt("on",deviceId,false);
-
+                            //  getConnectSocket("on",add,false);
+                           getConnectMqtt("on",deviceId,false);
                         }
                         else
                         {
-                            //getConnectSocket("on",add,false);
-                            getConnectMqtt("off",deviceId,false);
+                            //   getConnectSocket("off",add,false);
+                          getConnectMqtt("off",deviceId,false);
                         }
 
                     }catch (Exception e)
@@ -185,6 +156,31 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         }
     }
 
+    private String getDeviceId(String name)
+    {
+        String deviceId = "";
+        if (!mSharedPreferences.getAll().isEmpty()) {
+            Map<String, ?> map = mSharedPreferences.getAll();
+            Iterator iter = map.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry entry = (Map.Entry) iter.next();
+                String key = (String) entry.getKey();
+                Set<String> set=new HashSet<String>(mSharedPreferences.getStringSet(key, new HashSet<String>()));
+                for (String str : set) {
+                    if(str.contains("deviceName:"))
+                    {
+                        String temp = str.substring("deviceName:".length(), str.length());
+                        if(temp.equals(name))
+                        {
+                            deviceId = key;
+                            // break;
+                        }
+                    }
+                }
+            }
+        }
+        return deviceId;
+    }
     public Boolean getDeleteDeviceSocket(String msg,String add,int pos,boolean isReceive)
     {
         Boolean isSucces = false;
@@ -213,17 +209,8 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         Boolean isSucces = false;
         try{
             TimeUnit.MILLISECONDS.sleep(500);
-
-           // SetSocketThread myThread  = new SetSocketThread(add);
-            //myThread.start();
-            //myThread.join();
-            //TimeUnit.MILLISECONDS.sleep(500);
-            //if (socket.isConnected()) {
-             //   if (!socket.isOutputShutdown()) {
-                    mSendAsyncMqttTask = new SendAsyncMqttTask(deviceId,isReceive);
-                    isSucces =  mSendAsyncMqttTask.execute(msg).get();
-            //    }
-           // }
+             mSendAsyncMqttTask = new SendAsyncMqttTask(isReceive);
+             isSucces =  mSendAsyncMqttTask.execute(msg,deviceId).get();
         }
         catch (Exception e)
         {
@@ -292,9 +279,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     public void onClick(DialogInterface dialog, int which) {
                         // 清除sharedpreferences的数据
 
-                        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
                         String add = mSharedPreferences.getString(mDataList.get(pos),"");
-
                         Boolean isSuccess= getDeleteDeviceSocket("reset",add,pos,false);
                         if(isSuccess)
                         {
@@ -315,25 +300,35 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private void checkStatus()
     {
         try {
-            List<String> ipList = new ArrayList<String>();
-            mSharedPreferencesDeviceName = getSharedPreferences(PREFRENCE_Device_KEY, Context.MODE_PRIVATE);
-            mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
-            if (!mSharedPreferencesDeviceName.getAll().isEmpty()) {
-                Map<String, ?> map = mSharedPreferencesDeviceName.getAll();
-                Iterator iter = map.entrySet().iterator();
-                while (iter.hasNext()) {
-                    Map.Entry entry = (Map.Entry) iter.next();
-                    String key = (String) entry.getKey();
-                    String value =(String) entry.getValue();
-                    ipList.add(value);
-                }
+//            List<String> ipList = new ArrayList<String>();
+//            mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+//            if (!mSharedPreferences.getAll().isEmpty()) {
+//                Map<String, ?> map = mSharedPreferences.getAll();
+//                Iterator iter = map.entrySet().iterator();
+//                while (iter.hasNext()) {
+//                    Map.Entry entry = (Map.Entry) iter.next();
+//                    String key = (String) entry.getKey();
+//                    String value =(String) entry.getValue();
+//                    ipList.add(value);
+//                }
+//            }
+//
+//            mCheckStatusAsyncTask = new CheckStatusAsyncTask(this,mAdapter,ipList);
+//            mCheckStatusAsyncTask.execute("");
+
+
+            HashMap<String,String> deviceIdMap = new HashMap<String,String>();
+            for(int i=0 ; i< mDataList.size() ; i++)
+            {
+                String id = getDeviceId(mDataList.get(i));
+                deviceIdMap.put(mDataList.get(i),id);
             }
-           // mCheckStatusAsyncTask = new CheckStatusAsyncTask(this,mAdapter,ipList);
-            //mCheckStatusAsyncTask.execute("");
+            mCheckStatusAsyncMqttTask = new CheckStatusAsyncMqttTask(this,mAdapter,deviceIdMap,mDataList);
+            mCheckStatusAsyncMqttTask.execute("");
         }
         catch (Exception e)
         {
-
+            e.printStackTrace();
         }
     }
 

@@ -101,7 +101,8 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
                 is.close();
                 //os.close();
             } catch (Exception e) {
-                mAdapter.setStatusItem(index,"离线",false,false);
+                mAdapter.setStatusItem(index,"离线",true,true);
+              //  mAdapter.setStatusItem(index,"离线",false,false);
                 Log.e(e.getMessage(), "setClient: ", e.getCause());
                 e.printStackTrace();
             } finally {
