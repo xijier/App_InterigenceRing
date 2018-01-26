@@ -66,14 +66,21 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private CheckStatusAsyncMqttTask mCheckStatusAsyncMqttTask;
     private static final int PORT = 8266;
     private static String status = "offline";
+    private static boolean standalone = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control_device);
         mContext = controlDeviceActivity.this;
+        Intent intent = getIntent();
+        //从Intent当中根据key取得value
+        if (intent != null) {
+            boolean  value = intent.getBooleanExtra("key", false);
+            standalone = value;
+        }
         mDataList = new ArrayList<String>();
         mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
-        initView();
+        list_one = (ListView) findViewById(R.id.lv);
         getPreferencesData();
         mAdapter = new ListItemAdapter(mDataList, this);
         mAdapter.setOnInnerItemOnClickListener(this);
@@ -97,10 +104,6 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         startActivity(intent);
         //Intent intent = new Intent(this, deviceSetActivity.class);
         //startActivity(intent);
-    }
-
-    private void initView() {
-        list_one = (ListView) findViewById(R.id.lv);
     }
 
     private void getPreferencesData() {
@@ -131,13 +134,27 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     try{
                         if(checklight.isChecked())
                         {
-                            //  getConnectSocket("on",add,false);
-                           getConnectMqtt("on",deviceId,false);
+                            if(standalone)
+                            {
+                                getConnectSocket("ison",add,false);
+                            }
+                            else
+                            {
+                                getConnectMqtt("on",deviceId,false);
+                            }
+                            //
                         }
                         else
                         {
-                            //   getConnectSocket("off",add,false);
-                          getConnectMqtt("off",deviceId,false);
+                            if(standalone)
+                            {
+                                getConnectSocket("isoff",add,false);
+                            }
+                            else
+                            {
+                                getConnectMqtt("off",deviceId,false);
+                            }
+                            //
                         }
 
                     }catch (Exception e)
@@ -278,12 +295,17 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 清除sharedpreferences的数据
-
-                        String add = mSharedPreferences.getString(mDataList.get(pos),"");
+                        String add = mSharedPreferencesDeviceName.getString(mDataList.get(pos),"");
+                        //String add = mSharedPreferences.getString(mDataList.get(pos),"");
                         Boolean isSuccess= getDeleteDeviceSocket("reset",add,pos,false);
                         if(isSuccess)
                         {
-                            Editor editor = mSharedPreferences.edit();
+                            String id = getDeviceId(mDataList.get(pos));
+                            Editor editorid = mSharedPreferences.edit();
+                            editorid.remove(id);
+                            editorid.commit();// 提交修改
+
+                            Editor editor = mSharedPreferencesDeviceName.edit();
                             editor.remove(mAdapter.getItem(pos).toString());
                             editor.commit();// 提交修改
                             mAdapter.deleteItem(pos);
@@ -300,31 +322,28 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private void checkStatus()
     {
         try {
-//            List<String> ipList = new ArrayList<String>();
-//            mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
-//            if (!mSharedPreferences.getAll().isEmpty()) {
-//                Map<String, ?> map = mSharedPreferences.getAll();
-//                Iterator iter = map.entrySet().iterator();
-//                while (iter.hasNext()) {
-//                    Map.Entry entry = (Map.Entry) iter.next();
-//                    String key = (String) entry.getKey();
-//                    String value =(String) entry.getValue();
-//                    ipList.add(value);
-//                }
-//            }
-//
-//            mCheckStatusAsyncTask = new CheckStatusAsyncTask(this,mAdapter,ipList);
-//            mCheckStatusAsyncTask.execute("");
-
-
-            HashMap<String,String> deviceIdMap = new HashMap<String,String>();
-            for(int i=0 ; i< mDataList.size() ; i++)
+            if(standalone)
             {
-                String id = getDeviceId(mDataList.get(i));
-                deviceIdMap.put(mDataList.get(i),id);
+            List<String> ipList = new ArrayList<String>();
+                for(int i=0 ; i< mDataList.size() ; i++)
+                {
+                    String add = mSharedPreferencesDeviceName.getString(mDataList.get(i),"");
+                    ipList.add(add);
+                }
+            mCheckStatusAsyncTask = new CheckStatusAsyncTask(this,mAdapter,ipList);
+            mCheckStatusAsyncTask.execute("checkStatus");
             }
-            mCheckStatusAsyncMqttTask = new CheckStatusAsyncMqttTask(this,mAdapter,deviceIdMap,mDataList);
-            mCheckStatusAsyncMqttTask.execute("");
+            else
+            {
+                HashMap<String,String> deviceIdMap = new HashMap<String,String>();
+                for(int i=0 ; i< mDataList.size() ; i++)
+                {
+                    String id = getDeviceId(mDataList.get(i));
+                    deviceIdMap.put(mDataList.get(i),id);
+                }
+                mCheckStatusAsyncMqttTask = new CheckStatusAsyncMqttTask(this,mAdapter,deviceIdMap,mDataList);
+                mCheckStatusAsyncMqttTask.execute("");
+            }
         }
         catch (Exception e)
         {

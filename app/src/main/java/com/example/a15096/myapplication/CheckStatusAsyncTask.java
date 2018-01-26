@@ -14,6 +14,7 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by 15096 on 2018/1/5.
@@ -48,12 +49,12 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
 
     @Override
     protected Boolean doInBackground(String... params) {
-        String str = params[0];
+        String msg = params[0];
         try {
             //setClient(str);
             for(int i = 0 ; i <mipList.size(); i++)
             {
-                setClient(mipList.get(i),i);
+                setClient(mipList.get(i),i,msg);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,13 +74,18 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
        // Toast.makeText(mActivity, toastMsg, Toast.LENGTH_LONG).show();
     }
 
-    protected void setClient(String ip,int index)
+    protected void setClient(String ip,int index,String msg)
     {
         try {
             Socket socket=null;
             try {
                 socket=new Socket(ip, 8266);
                 socket.setSoTimeout(1000);
+
+                //给服务端发送响应信息\
+                OutputStream os=socket.getOutputStream();
+                os.write(msg.getBytes());
+
                 //接受服务端消息并打印
                 InputStream is=socket.getInputStream();
                 byte b[]=new byte[1024];

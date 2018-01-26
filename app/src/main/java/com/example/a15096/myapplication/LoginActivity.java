@@ -153,7 +153,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         button_wechatButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                deviceSetPage();
+                deviceSetPage(false);
             }
         });
 
@@ -164,6 +164,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 weiboSetPage();
             }
         });
+
+        Button button_withoutNetwork = (Button) findViewById(R.id.button_withoutNetwork);
+        button_withoutNetwork.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deviceSetPage(true);
+            }
+        });
+
 
         Button email_register_button = (Button) findViewById(R.id.email_register_button);
         email_register_button.setOnClickListener(new OnClickListener() {
@@ -241,10 +250,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     /**
      * Device Set page
      */
-    private void deviceSetPage()
+    private void deviceSetPage(boolean isStandalone)
     {
         Intent intent=new Intent(this,controlDeviceActivity.class);
+        intent.putExtra("key",isStandalone);
         startActivity(intent);
+
         //Intent intent=new Intent(this,SendToWXActivity.class);
         //startActivity(intent);
     }

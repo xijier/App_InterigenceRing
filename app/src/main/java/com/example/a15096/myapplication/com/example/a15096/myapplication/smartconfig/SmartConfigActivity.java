@@ -186,7 +186,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
             address = address.substring(1, address.length());
         }
 
-        String deviceId = getConnectSocket("getId",address,true);
+        String deviceId = getConnectSocket("smartConfig",address,true);
 
 /*
         Long timeSpan= System.currentTimeMillis();
