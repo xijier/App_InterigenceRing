@@ -81,6 +81,10 @@ public class SendAsyncTask extends AsyncTask<String, Void, Boolean> {
       // Socket socket=null;
         try {
             //socket=new Socket("192.168.0.109", 8266);
+            //给服务端发送响应信息
+            OutputStream os=client.getOutputStream();
+            os.write(msg.getBytes());
+            //is.close();
             //接受服务端消息并打印
             if(isReceive)
             {
@@ -90,10 +94,6 @@ public class SendAsyncTask extends AsyncTask<String, Void, Boolean> {
                 String str = new String(b);
                 is.close();
             }
-            //给服务端发送响应信息
-            OutputStream os=client.getOutputStream();
-            os.write(msg.getBytes());
-            //is.close();
             os.close();
             isSuccess = true;
         } catch (Exception e) {

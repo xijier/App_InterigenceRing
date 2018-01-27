@@ -79,24 +79,26 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
         try {
             Socket socket=null;
             try {
+                TimeUnit.MILLISECONDS.sleep(1000);
                 socket=new Socket(ip, 8266);
-                socket.setSoTimeout(1000);
-
-                //给服务端发送响应信息\
+               // socket.setSoTimeout(1000);
+                //给服务端发送响应信息
                 OutputStream os=socket.getOutputStream();
                 os.write(msg.getBytes());
-
                 //接受服务端消息并打印
                 InputStream is=socket.getInputStream();
-                byte b[]=new byte[1024];
-                is.read(b);
-                String str =new String(b);
-                str = str.substring(0, 4);
+                String str="";
+                while(str.isEmpty()) {
+                    byte b[] = new byte[is.available()];
+                    is.read(b);
+                    str = new String(b);
+                }
+
                 if(str.equals("ison"))
                 {
                     mAdapter.setStatusItem(index,"在线",true,true);
                 }
-                else if(str.equals("isof"))
+                else if(str.equals("isoff"))
                 {
                     mAdapter.setStatusItem(index,"在线",false,true);
                 }
@@ -105,7 +107,7 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
 
                 }
                 is.close();
-                //os.close();
+                os.close();
             } catch (Exception e) {
                 mAdapter.setStatusItem(index,"离线",true,true);
               //  mAdapter.setStatusItem(index,"离线",false,false);

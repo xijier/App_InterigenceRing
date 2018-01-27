@@ -73,6 +73,7 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
             //viewHolder.switchlight = (Switch) convertView.findViewById(R.id.switchlight);
             viewHolder.checkboxlight = (CheckBox) convertView.findViewById(R.id.checkboxlight);
             viewHolder.deletedevice = (Button) convertView.findViewById(R.id.buttonDelete);
+            viewHolder.sharing = (Button) convertView.findViewById(R.id.buttonSharing);
             viewHolder.deviceDecription = (TextView) convertView.findViewById(R.id.deviceDecription);
             viewHolder.status = (TextView) convertView.findViewById(R.id.status);
             convertView.setTag(viewHolder);
@@ -82,11 +83,13 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
        // viewHolder.switchlight.setOnClickListener(this);
         viewHolder.checkboxlight.setOnClickListener(this);
         viewHolder.deletedevice.setOnClickListener(this);
+        viewHolder.sharing.setOnClickListener(this);
         viewHolder.deviceDecription.setOnClickListener(this);
         viewHolder.status.setOnClickListener(this);
         //viewHolder.switchlight.setTag(position);
         viewHolder.checkboxlight.setTag(position);
         viewHolder.deletedevice.setTag(position);
+        viewHolder.sharing.setTag(position);
         viewHolder.status.setTag(position);
 
         viewHolder.deviceDecription.setText(mList.get(position));
@@ -95,6 +98,7 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
             viewHolder.checkboxlight.setChecked(isCheckLight);
             viewHolder.checkboxlight.setEnabled(isEnableLight);
             viewHolder.deletedevice.setEnabled(isEnableLight);
+            viewHolder.sharing.setEnabled(isEnableLight);
         } else {
             //viewHolder.status.setBackgroundColor(Color.WHITE);
         }
@@ -109,6 +113,7 @@ public class ListItemAdapter extends BaseAdapter implements OnClickListener {
 
     public final static class ViewHolder {
         Button deletedevice;
+        Button sharing;
        // Switch switchlight;
         CheckBox checkboxlight;
         TextView deviceDecription;

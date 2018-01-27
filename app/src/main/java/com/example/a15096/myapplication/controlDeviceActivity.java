@@ -126,7 +126,6 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         position = (Integer) v.getTag();
         switch (v.getId()) {
             case R.id.checkboxlight:
-
                 String name =  mDataList.get(position);
                 String add = mSharedPreferencesDeviceName.getString(name,"");
                 String deviceId = getDeviceId(name);
@@ -162,15 +161,24 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                        // Toast.makeText(getApplicationContext(), "注冊失敗", Toast.LENGTH_SHORT).show();
                     }
                 /////////////////////
-                Log.e("内部item--1-->", position + "" + checklight.isChecked() + mDataList.get(position));
+                Log.e("内部item--->", position + "" + checklight.isChecked() + mDataList.get(position));
                 break;
             case R.id.buttonDelete:
-                Log.e("内部item--2-->", position + " delete");
+                Log.e("内部item--->", position + " delete");
                 showDeleteDialog(position);
+                break;
+            case R.id.buttonSharing:
+                Log.e("内部item--->", position + " Sharing");
+                shartingDevice(position);
                 break;
             default:
                 break;
         }
+    }
+
+    private void shartingDevice(int position)
+    {
+
     }
 
     private String getDeviceId(String name)
