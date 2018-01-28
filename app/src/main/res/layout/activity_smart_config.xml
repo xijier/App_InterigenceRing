@@ -93,6 +93,13 @@
         android:layout_margin="5dip"
         android:text="配置" />
 
+        <Button
+            android:id="@+id/familySharing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dip"
+            android:text="获取家人分享" />
+
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dip"

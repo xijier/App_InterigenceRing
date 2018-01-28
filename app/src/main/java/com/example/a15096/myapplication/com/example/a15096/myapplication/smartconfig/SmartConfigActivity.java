@@ -37,7 +37,12 @@ import com.example.a15096.myapplication.com.example.a15096.myapplication.smartco
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -185,8 +190,8 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         {
             address = address.substring(1, address.length());
         }
-
-        String deviceId = getConnectSocket("smartConfig",address,true);
+        Long timeSpan= System.currentTimeMillis();
+        String deviceId = getConnectSocket("esp8266"+String.valueOf(timeSpan),address,true);
 
 /*
         Long timeSpan= System.currentTimeMillis();
@@ -304,9 +309,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
             Long timeSpan= System.currentTimeMillis();
             TextView deviceSetname = (TextView) findViewById(R.id.deviceSetname);
             TextView wifipassword = (TextView) findViewById(R.id.esptouch_pwd);
-            mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
 
-            mSharedPreferencesDeviceName = getSharedPreferences(PREFRENCE_Device_KEY, Context.MODE_PRIVATE);
             String deviceName = deviceSetname.getText().toString();
 
             if(!mSharedPreferencesDeviceName.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
@@ -410,6 +413,10 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_smart_config);
         mShared = getSharedPreferences(SSID_PASSWORD, Context.MODE_PRIVATE);
 
+        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
+
+        mSharedPreferencesDeviceName = getSharedPreferences(PREFRENCE_Device_KEY, Context.MODE_PRIVATE);
+
         mCurrentSsidTV = (TextView)findViewById(R.id.esptouch_current_ssid);
        // mConfigureSP = (Spinner)findViewById(R.id.esptouch_configure_wifi);
         mPasswordET = (EditText)findViewById(R.id.esptouch_pwd);
@@ -424,6 +431,15 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         //mDeletePasswordBtn.setOnClickListener(this);
         mConfirmBtn.setOnClickListener(this);
 
+
+        Button btnfamilySharing = (Button) findViewById(R.id.familySharing);
+        btnfamilySharing.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                familySharing();
+            }
+        });
+
         mScanResultList = new ArrayList<ScanResult>();
         mScanResultSsidList = new ArrayList<String>();
         mWifiAdapter =
@@ -434,6 +450,121 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(mReceiver, filter);
 
+    }
+    private MulticastSocket ds;
+    String multicastHost="224.0.0.1";
+    InetAddress receiveAddress;
+    private void familySharing()
+    {
+        try {
+            ds = new MulticastSocket(8267);
+             multicastHost="224.0.0.1";
+            receiveAddress=InetAddress.getByName(multicastHost);
+            ds.joinGroup(receiveAddress);
+            getSharingSocket myThread  = new getSharingSocket();
+            myThread.start();
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
+    private String  reciveData="";
+    private InetAddress iaddress;
+    public class getSharingSocket extends Thread {
+        String ip = "";
+
+        public void run() {
+            try {
+                byte buf[] = new byte[1024];
+                DatagramPacket dp = new DatagramPacket(buf, 1024);
+                while (ip.isEmpty()) {
+                    try {
+                        ds.receive(dp);
+                        reciveData =  new String(buf, 0, dp.getLength());
+                        ip = dp.getAddress().toString();
+                        iaddress = dp.getAddress();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                //Toast.makeText(SmartConfigActivity.this, reciveData, Toast.LENGTH_LONG).show();
+                String deviceName =splitData(reciveData,"name:","address:");
+                String address =splitData(reciveData,"address:","end:");
+                String deviceId =splitData(reciveData,"id:","name:");
+                saveShareData(deviceName,address,deviceId);
+                ShareUdpSocket mThread = new ShareUdpSocket();
+                mThread.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+            }
+        }
+    }
+
+    public String splitData(String str, String strStart, String strEnd) {
+        String tempStr;
+        tempStr = str.substring(str.indexOf(strStart) +strStart.length(), str.lastIndexOf(strEnd));
+        return tempStr;
+    }
+
+    private void  saveShareData(String deviceName,String address,String deviceId )
+    {
+        if(!mSharedPreferencesDeviceName.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
+        {
+            SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+            editor.putString(deviceName, address);
+            editor.commit();
+        }
+        else if(deviceName.isEmpty())
+        {
+            int i = 1;
+            while(mSharedPreferencesDeviceName.getAll().containsKey(deviceName+String.valueOf(i)))
+            {
+                i++;
+            }
+            deviceName = deviceName+String.valueOf(i);
+            SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+            editor.putString(deviceName, address);
+            editor.commit();
+        }
+        else
+        {
+            int i = 1;
+            while(mSharedPreferencesDeviceName.getAll().containsKey("智能环设备"+String.valueOf(i)))
+            {
+                i++;
+            }
+            deviceName = "智能环设备"+String.valueOf(i);
+            SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
+            editor.putString(deviceName,address);
+            editor.commit();
+        }
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        Set<String> setValue = new HashSet<String>();
+        setValue.add("deviceName:"+deviceName);
+        setValue.add("address:"+address);
+        editor.putStringSet(deviceId,setValue);
+        editor.commit();
+    }
+    public class ShareUdpSocket extends Thread {
+        public void run() {
+            Socket socket=null;
+            try {
+                socket=new Socket(iaddress, 8268);
+                //接受服务端消息并打印
+              //  InputStream is=socket.getInputStream();
+               // byte b[]=new byte[1024];
+              //  is.read(b);
+                //给服务端发送响应信息
+                OutputStream os=socket.getOutputStream();
+                os.write(reciveData.getBytes());
+                os.close();
+                socket.close();
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

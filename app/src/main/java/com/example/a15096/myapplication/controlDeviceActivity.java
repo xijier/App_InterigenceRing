@@ -25,6 +25,10 @@ import android.content.DialogInterface;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -169,16 +173,97 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                 break;
             case R.id.buttonSharing:
                 Log.e("内部item--->", position + " Sharing");
-                shartingDevice(position);
+                shareingDevice(position);
                 break;
             default:
                 break;
         }
     }
 
-    private void shartingDevice(int position)
+    private String udpmessage;
+    private boolean sharingFlag = false;
+    private String deviceInfo;
+    private void shareingDevice(int position)
     {
+        String id = getDeviceId(mDataList.get(position));
+        String add = mSharedPreferencesDeviceName.getString(mDataList.get(position),"");
 
+        deviceInfo = "id:"+id + "name:"+mDataList.get(position)+"address:"+add+"end:";
+        DatagramPacket dataPacket = null;
+        String handlemessage;
+        try {
+            MulticastSocket ms;
+            getUdpSocket myThread  = new getUdpSocket();
+            myThread.start();
+            int count = 0;
+            while(true)
+            {
+                ms = new MulticastSocket();
+                ms.setTimeToLive(5);
+                //将本机的IP（这里可以写动态获取的IP）地址放到数据包里，其实server端接收到数据包后也能获取到发包方的IP的
+                byte[] data = deviceInfo.getBytes();
+                //224.0.0.1为广播地址
+                InetAddress address = InetAddress.getByName("224.0.0.1");
+                //这个地方可以输出判断该地址是不是广播类型的地址
+                System.out.println(address.isMulticastAddress());
+                dataPacket = new DatagramPacket(data, data.length, address,8267);
+                ms.send(dataPacket);
+                TimeUnit.MILLISECONDS.sleep(500);
+                if(sharingFlag ==true)
+                {
+                    break;
+                }
+                if(count>20)
+                {
+                    handlemessage = "网络状态不佳，请重试";
+                    Toast.makeText(mContext, handlemessage, Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                count++;
+            }
+            ms.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public class getUdpSocket extends Thread {
+
+        public void run() {
+            ServerSocket serverSocket=null;
+            Socket socket=null;
+            try {
+                serverSocket=new ServerSocket(8268);
+                //建立跟客户端的连接
+                socket=serverSocket.accept();
+                //向客户端发送消息
+                OutputStream os=socket.getOutputStream();
+                os.write(deviceInfo.getBytes());
+                InputStream is=socket.getInputStream();
+                //接受客户端的响应
+                byte[] b=new byte[is.available()];
+                is.read(b);
+                String str = new String(b);
+                System.out.println(str.trim()+" "+str.length());
+                serverSocket.close();
+                socket.close();
+                if(str.equals(deviceInfo))
+                {
+                    sharingFlag = true;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                //操作结束，关闭socket
+                try {
+                    serverSocket.close();
+                    socket.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private String getDeviceId(String name)

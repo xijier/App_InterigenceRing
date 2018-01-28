@@ -88,10 +88,17 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
                 //接受服务端消息并打印
                 InputStream is=socket.getInputStream();
                 String str="";
+                int i = 0;
                 while(str.isEmpty()) {
                     byte b[] = new byte[is.available()];
                     is.read(b);
                     str = new String(b);
+                    if(i>100)
+                    {
+                        break;
+                    }
+                    i++;
+                    TimeUnit.MILLISECONDS.sleep(100);
                 }
 
                 if(str.equals("ison"))
@@ -104,7 +111,7 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
                 }
                 else
                 {
-
+                    mAdapter.setStatusItem(index,"离线",true,true);
                 }
                 is.close();
                 os.close();
