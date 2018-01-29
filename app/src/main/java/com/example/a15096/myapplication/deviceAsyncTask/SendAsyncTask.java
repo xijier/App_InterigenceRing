@@ -1,4 +1,4 @@
-package com.example.a15096.myapplication;
+package com.example.a15096.myapplication.deviceAsyncTask;
 
 import android.os.AsyncTask;
 import android.util.Log;

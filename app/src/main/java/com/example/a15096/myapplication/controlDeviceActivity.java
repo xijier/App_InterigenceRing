@@ -1,32 +1,23 @@
 package com.example.a15096.myapplication;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
-import android.widget.Switch;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 
-import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.ServerSocket;
@@ -35,13 +26,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import android.widget.AdapterView.OnItemClickListener;
@@ -49,14 +36,17 @@ import android.widget.Toast;
 
 import com.example.a15096.myapplication.ListItemAdapter.InnerItemOnclickListener;
 import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.SmartConfigActivity;
-import com.example.a15096.myapplication.mqtt.CheckStatusAsyncMqttTask;
+import com.example.a15096.myapplication.deviceAsyncTask.CheckStatusAsyncTask;
+import com.example.a15096.myapplication.deviceAsyncTask.DeleteAsyncTask;
+import com.example.a15096.myapplication.deviceAsyncTask.SendAsyncMqttTask;
+import com.example.a15096.myapplication.deviceAsyncTask.SendAsyncTask;
+import com.example.a15096.myapplication.deviceAsyncTask.CheckStatusAsyncMqttTask;
 
 public class controlDeviceActivity extends AppCompatActivity implements InnerItemOnclickListener,
         OnItemClickListener {
     private ListView list_one;
     private List<String> mDataList;
     private ListItemAdapter mAdapter;
-    //private static final String[] Datas = {"客厅灯", "主卧室灯", "厨房灯", "卫生间灯", "次卧灯", "餐厅灯"};
     private Context mContext = null;
     /***数据持久化**/
     private final static String PREFRENCE_FILE_KEY = "com.example.a15096.shared_preferences";
@@ -106,8 +96,6 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
         finish();
         Intent intent = new Intent(this, SmartConfigActivity.class);
         startActivity(intent);
-        //Intent intent = new Intent(this, deviceSetActivity.class);
-        //startActivity(intent);
     }
 
     private void getPreferencesData() {

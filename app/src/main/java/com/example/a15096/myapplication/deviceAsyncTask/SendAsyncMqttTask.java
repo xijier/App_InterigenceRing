@@ -1,11 +1,7 @@
-package com.example.a15096.myapplication.mqtt;
+package com.example.a15096.myapplication.deviceAsyncTask;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
-
-import com.example.a15096.myapplication.ListItemAdapter;
 
 import org.json.JSONObject;
 
@@ -15,70 +11,60 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.net.HttpURLConnection;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
+import java.net.URLEncoder;
 
 /**
- * Created by 15096 on 2018/1/17.
+ * Created by 15096 on 2018/1/16.
  */
 
-public class CheckStatusAsyncMqttTask extends AsyncTask<String, Void, Boolean> {
+public class SendAsyncMqttTask extends AsyncTask<String, Void, Boolean> {
 
-    private Activity mActivity;
-    private ProgressDialog mDialog;
-    private List<String> mList;
-    private ListItemAdapter mAdapter;
-    private  HashMap<String,String> mdeviceIdMap;
-
-    public CheckStatusAsyncMqttTask(Activity activity, ListItemAdapter Adapter,HashMap<String,String> deviceIdMap,List<String> DataList)
+    //这里是连接ESP8266的IP和端口号，IP是通过指令在单片机开发板查询到，而端口号可以自行设置，也可以使用默认的，333就是默认的
+    private PrintStream out = null;
+    private boolean isReceive = false;
+    public SendAsyncMqttTask(boolean isReceive)
     {
-        mActivity = activity;
-        mAdapter = Adapter;
-        mdeviceIdMap= deviceIdMap;
-        mList = DataList ;
+        this.isReceive= isReceive;
     }
-
     @Override
-    protected void onPreExecute()
-    {
-        mDialog = new ProgressDialog(mActivity);
-        mDialog.setMessage("正在获取设备信息...");
-        mDialog.setCanceledOnTouchOutside(false);
-        //  mDialog.setOnCancelListener(this);
-        mDialog.show();
-    }
-
-    @Override
-    public Boolean doInBackground(String... params) {
-        String str = params[0];
+    protected Boolean doInBackground(String... params) {
+        String value = params[0];
+        String deviceId = params[1];
         try {
-            for(int i = 0 ; i <mList.size(); i++)
+            // setServer(str);
+            if(value.equals("on"))
             {
-                httpUrlConnPost(mdeviceIdMap.get(mList.get(i)),i);
+                value = "1";
             }
+            else if(value.equals("off"))
+            {
+                value = "0";
+            }
+            else
+            {
+
+            }
+             httpUrlConnPost(value,deviceId);
+            return  true;
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return null;
     }
 
-    @Override
-    protected void onPostExecute(final Boolean result)
-    {
-        mDialog.dismiss();
-        mAdapter.notifyDataSetChanged();
-    }
-
-    protected boolean httpUrlConnPost(String deviceId,int index){
+    protected boolean httpUrlConnPost(String value,String deviceId){
         boolean status = false;
         HttpURLConnection urlConnection = null;
         URL url = null;
         try {
             // url = new URL("http://192.168.0.103:9000/mobilelogin");
-            url = new URL("http://192.168.0.103:9000/checkEspStatus");
+            url = new URL("http://192.168.0.103:9000/setespStatus");
             urlConnection = (HttpURLConnection) url.openConnection();//打开http连接
             urlConnection.setConnectTimeout(3000);//连接的超时时间
             urlConnection.setUseCaches(false);//不使用缓存
@@ -92,6 +78,7 @@ public class CheckStatusAsyncMqttTask extends AsyncTask<String, Void, Boolean> {
             urlConnection.connect();// 连接，从上述至此的配置必须要在connect之前完成，实际上它只是建立了一个与服务器的TCP连接
 
             JSONObject json = new JSONObject();//创建json对象
+            json.put("value",value );//使用URLEncoder.encode对特殊和不可见字符进行编码
             json.put("deviceid", deviceId);//把数据put进json对象中
             String jsonstr = json.toString();//把JSON对象按JSON的编码格式转换为字符串
             //------------字符流写入数据------------
@@ -112,13 +99,13 @@ public class CheckStatusAsyncMqttTask extends AsyncTask<String, Void, Boolean> {
                 in.close();
                 br.close();
                 String result = buffer.toString();
-                if(result.equals("ison"))
+                if(result.equals("ok"))
                 {
-                    mAdapter.setStatusItem(index,"在线",true,true);
+                    status  = true;
                 }
-                else if(str.equals("isoff"))
+                else
                 {
-                    mAdapter.setStatusItem(index,"在线",false,true);
+                    status =  false;
                 }
             }else{
                 status = false;
@@ -131,4 +118,5 @@ public class CheckStatusAsyncMqttTask extends AsyncTask<String, Void, Boolean> {
             return status;
         }
     }
+
 }

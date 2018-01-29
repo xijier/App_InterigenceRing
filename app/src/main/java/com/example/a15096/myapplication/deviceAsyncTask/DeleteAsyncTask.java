@@ -1,9 +1,11 @@
-package com.example.a15096.myapplication;
+package com.example.a15096.myapplication.deviceAsyncTask;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.example.a15096.myapplication.ListItemAdapter;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,7 +28,7 @@ public class DeleteAsyncTask extends AsyncTask<String, Void, Boolean> {
     private ListItemAdapter mAdapter;
     private Activity mActivity;
     private int mpos;
-    DeleteAsyncTask(Activity activity,Socket client,ListItemAdapter Adapter,int pos,boolean isReceive)
+    public DeleteAsyncTask(Activity activity,Socket client,ListItemAdapter Adapter,int pos,boolean isReceive)
     {
         this.client = client;
         this.isReceive= isReceive;

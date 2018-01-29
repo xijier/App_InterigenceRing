@@ -50,8 +50,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class SmartConfigActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener
-,AdapterView.OnItemSelectedListener
-{
+        , AdapterView.OnItemSelectedListener {
     private static final String SSID_PASSWORD = "ssid_password";
     private static final int REQUEST_CODE_ACCESS_COARSE_LOCATION = 1;
     private SharedPreferences mShared;
@@ -59,11 +58,10 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
     private final static String PREFRENCE_Device_KEY = "com.example.a15096.shared_preferences_devicename";
     private SharedPreferences mSharedPreferences;
     private SharedPreferences mSharedPreferencesDeviceName;
-    Socket socket = null;
+    private Socket socket = null;
     private SendAsyncGetIdTask mSendAsyncTask;
-
     private TextView mCurrentSsidTV;
-   // private Spinner mConfigureSP;
+    // private Spinner mConfigureSP;
     private TextView mSsidET;
     private EditText mPasswordET;
     private CheckBox mShowPasswordCB;
@@ -75,65 +73,57 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
     private BaseAdapter mWifiAdapter;
     private volatile List<ScanResult> mScanResultList;
     private volatile List<String> mScanResultSsidList;
-
+    private MulticastSocket ds;
+    private String multicastHost = "224.0.0.1";
+    private InetAddress receiveAddress;
     private String mCurrentSSID;
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver()
-    {
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
-        public void onReceive(Context context, Intent intent)
-        {
+        public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION))
-            {
+            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 updateCurrentConnectionInfo();
             }
         }
 
     };
-    private void updateCurrentConnectionInfo()
-    {
-        wifimanager=(WifiManager)getSystemService(WIFI_SERVICE);
-        WifiInfo wifiinfo=wifimanager.getConnectionInfo();
+
+    private void updateCurrentConnectionInfo() {
+        wifimanager = (WifiManager) getSystemService(WIFI_SERVICE);
+        WifiInfo wifiinfo = wifimanager.getConnectionInfo();
 
         mCurrentSSID = wifiinfo.getSSID();
-        if (mCurrentSSID == null)
-        {
+        if (mCurrentSSID == null) {
             mCurrentSSID = "";
         }
         mCurrentSsidTV.setText(getString(R.string.esp_esptouch_current_ssid, mCurrentSSID));
-        String replaceStr =  mCurrentSSID;
-        char quto='"';
-        if(replaceStr.charAt(0)==quto&& replaceStr.charAt(replaceStr.length()-1)==quto)
-        {
+        String replaceStr = mCurrentSSID;
+        char quto = '"';
+        if (replaceStr.charAt(0) == quto && replaceStr.charAt(replaceStr.length() - 1) == quto) {
             replaceStr = replaceStr.substring(1, replaceStr.length());
-            replaceStr = replaceStr.substring(0,replaceStr.length() - 1);
+            replaceStr = replaceStr.substring(0, replaceStr.length() - 1);
         }
         mSsidET.setText(replaceStr);
-        if (!TextUtils.isEmpty(mCurrentSSID))
-        {
+        if (!TextUtils.isEmpty(mCurrentSSID)) {
             scanWifi();
             mWifiAdapter.notifyDataSetChanged();
-            for (int i = 0; i < mScanResultList.size(); i++)
-            {
+            for (int i = 0; i < mScanResultList.size(); i++) {
                 String ssid = mScanResultList.get(i).SSID;
-                if (ssid.equals(mCurrentSSID))
-                {
+                if (ssid.equals(mCurrentSSID)) {
                     //mConfigureSP.setSelection(i);
                     break;
                 }
             }
-        }
-        else
-        {
+        } else {
             mPasswordET.setText("");
         }
     }
 
     private void accessLocationPermission() {
         int accessCoarseLocation = checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION);
-        int accessFineLocation   = checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        int accessFineLocation = checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION);
 
         List<String> listRequestPermission = new ArrayList<String>();
 
@@ -175,88 +165,28 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         accessLocationPermission();
         wifimanager.setWifiEnabled(true);
         wifimanager.startScan();
-        mScanResultList=wifimanager.getScanResults();
+        mScanResultList = wifimanager.getScanResults();
         mScanResultSsidList.clear();
-        for(ScanResult scanResult : mScanResultList)
-        {
+        for (ScanResult scanResult : mScanResultList) {
             mScanResultSsidList.add(scanResult.SSID);
         }
     }
 
-    private void adddeviceSet(String address)
-    {
-        char quto='/';
-        if(address.charAt(0)==quto)
-        {
+    private void adddeviceSet(String address) {
+        char quto = '/';
+        if (address.charAt(0) == quto) {
             address = address.substring(1, address.length());
         }
-        Long timeSpan= System.currentTimeMillis();
-        String deviceId = getConnectSocket("esp8266"+String.valueOf(timeSpan),address,true);
-
-/*
-        Long timeSpan= System.currentTimeMillis();
-        TextView deviceSetname = (TextView) findViewById(R.id.deviceSetname);
-        TextView wifipassword = (TextView) findViewById(R.id.esptouch_pwd);
-        mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
-
-        String deviceName = deviceSetname.getText().toString();
-
-        if(!mSharedPreferences.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
-        {
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.putString(deviceSetname.getText().toString(), address);
-            editor.commit();
-        }
-        else if(deviceName.isEmpty())
-        {
-            int i = 1;
-            while(mSharedPreferences.getAll().containsKey(deviceName+String.valueOf(i)))
-            {
-                i++;
-            }
-            deviceName = deviceName+String.valueOf(i);
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.putString(deviceName, address);
-            editor.commit();
-        }
-        else
-        {
-            int i = 1;
-            while(mSharedPreferences.getAll().containsKey("智能环设备"+String.valueOf(i)))
-            {
-                i++;
-            }
-            deviceName = "智能环设备"+String.valueOf(i);
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.putString(deviceName,address);
-            editor.commit();
-        }
-*/
-//        SharedPreferences.Editor editor = mSharedPreferences.edit();
-//        editor.putString(deviceSetname.getText().toString(), address);
-//        Set<String> setValue = new HashSet<String>();
-//        setValue.add("deviceName:"+deviceName);
-//        setValue.add("address:"+address);
-//        editor.putStringSet(deviceId,setValue);
-//        editor.commit();
+        Long timeSpan = System.currentTimeMillis();
+        String deviceId = getConnectSocket("esp8266" + String.valueOf(timeSpan), address, true);
     }
 
-    public String getConnectSocket(String msg,String address,boolean isReceive)
-    {
+    private String getConnectSocket(String msg, String address, boolean isReceive) {
         String deviceId = "";
-        try{
-          //  TimeUnit.MILLISECONDS.sleep(2000);
-          //  SetSocketThreadID myThread  = new SetSocketThreadID(address);
-          //  myThread.start();
-          //  myThread.join();
-          //  TimeUnit.MILLISECONDS.sleep(500);
-         //   if (socket.isConnected()) {
-                   mSendAsyncTask = new SendAsyncGetIdTask(socket,address,isReceive);
-                   deviceId =  mSendAsyncTask.execute(msg).get();
-       //     }
-        }
-        catch (Exception e)
-        {
+        try {
+            mSendAsyncTask = new SendAsyncGetIdTask(socket, address, isReceive);
+            deviceId = mSendAsyncTask.execute(msg).get();
+        } catch (Exception e) {
 
         }
         return deviceId;
@@ -264,13 +194,14 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
 
     public class SetSocketThreadID extends Thread {
         String ip = null;
-        SetSocketThreadID(String ip)
-        {
+
+        SetSocketThreadID(String ip) {
             this.ip = ip;
         }
+
         public void run() {
             try {
-                socket  =new Socket(this.ip, 8266);
+                socket = new Socket(this.ip, 8266);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -284,18 +215,19 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         private PrintStream out = null;
         private boolean isReceive = false;
         private String address;
-        public SendAsyncGetIdTask(Socket client,String address,boolean isReceive)
-        {
+
+        public SendAsyncGetIdTask(Socket client, String address, boolean isReceive) {
             this.client = client;
-            this.isReceive= isReceive;
-            this.address= address;
+            this.isReceive = isReceive;
+            this.address = address;
         }
+
         @Override
         protected String doInBackground(String... params) {
             String str = params[0];
             try {
-                String deviceId =  setClient(str);
-                return  deviceId;
+                String deviceId = setClient(str);
+                return deviceId;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -306,100 +238,58 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         protected void onPostExecute(final String deviceId) {
             //mAuthTask = null;
             //showProgress(false);
-            Long timeSpan= System.currentTimeMillis();
+            Long timeSpan = System.currentTimeMillis();
             TextView deviceSetname = (TextView) findViewById(R.id.deviceSetname);
             TextView wifipassword = (TextView) findViewById(R.id.esptouch_pwd);
-
             String deviceName = deviceSetname.getText().toString();
-
-            if(!mSharedPreferencesDeviceName.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
-            {
-                SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
-                editor.putString(deviceSetname.getText().toString(), address);
-                editor.commit();
-            }
-            else if(deviceName.isEmpty())
-            {
-                int i = 1;
-                while(mSharedPreferencesDeviceName.getAll().containsKey(deviceName+String.valueOf(i)))
-                {
-                    i++;
-                }
-                deviceName = deviceName+String.valueOf(i);
-                SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
-                editor.putString(deviceName, address);
-                editor.commit();
-            }
-            else
-            {
-                int i = 1;
-                while(mSharedPreferencesDeviceName.getAll().containsKey("智能环设备"+String.valueOf(i)))
-                {
-                    i++;
-                }
-                deviceName = "智能环设备"+String.valueOf(i);
-                SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
-                editor.putString(deviceName,address);
-                editor.commit();
-            }
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            Set<String> setValue = new HashSet<String>();
-            setValue.add("deviceName:"+deviceName);
-            setValue.add("address:"+address);
-            editor.putStringSet(deviceId,setValue);
-            editor.commit();
+            saveShareData(deviceName,address,deviceId);
         }
 
         @Override
         protected void onCancelled() {
-           // mAuthTask = null;
+            // mAuthTask = null;
             //showProgress(false);
         }
 
-        protected String setClient(String msg)
-        {
+        protected String setClient(String msg) {
             String deviceId = "";
             Socket newclient = null;
             try {
                 TimeUnit.MILLISECONDS.sleep(1000);
-                newclient  =new Socket(address, 8266);
+                newclient = new Socket(address, 8266);
                 //给服务端发送响应信息
-                OutputStream os=newclient.getOutputStream();
+                OutputStream os = newclient.getOutputStream();
                 os.write(msg.getBytes());
                 //服务器回应
-                InputStream is=newclient.getInputStream();
+                InputStream is = newclient.getInputStream();
                 String str = "";
-                while(true)
-                {
-                    byte[] b  = new byte[is.available()];
+                while (true) {
+                    byte[] b = new byte[is.available()];
                     is.read(b);
                     deviceId = new String(b);
-                    if(deviceId.length()>0)
-                    {
-                        for(int i =0; i< deviceId.length() ; i++)
-                        {
-                           char value =   deviceId.charAt(i);
-                            if(value!=0)
-                            {
+                    if (deviceId.length() > 0) {
+                        for (int i = 0; i < deviceId.length(); i++) {
+                            char value = deviceId.charAt(i);
+                            if (value != 0) {
                                 str += String.valueOf(value);
                             }
                         }
                         break;
                     }
                 }
-                deviceId =str;
+                deviceId = str;
                 is.close();
                 os.close();
-                return  deviceId;
+                return deviceId;
             } catch (Exception e) {
                 Log.e(e.getMessage(), "setClient: ", e.getCause());
                 e.printStackTrace();
-                return  deviceId;
+                return deviceId;
             } finally {
                 //操作结束，关闭socket
                 try {
                     client.close();
-                    return  deviceId;
+                    return deviceId;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -417,14 +307,14 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
 
         mSharedPreferencesDeviceName = getSharedPreferences(PREFRENCE_Device_KEY, Context.MODE_PRIVATE);
 
-        mCurrentSsidTV = (TextView)findViewById(R.id.esptouch_current_ssid);
-       // mConfigureSP = (Spinner)findViewById(R.id.esptouch_configure_wifi);
-        mPasswordET = (EditText)findViewById(R.id.esptouch_pwd);
-        mSsidET = (TextView)findViewById(R.id.esptouch_ssid);
-        mShowPasswordCB = (CheckBox)findViewById(R.id.esptouch_show_pwd);
-       // mIsSsidHiddenCB = (CheckBox)findViewById(R.id.esptouch_isSsidHidden);
-      //  mDeletePasswordBtn = (Button)findViewById(R.id.esptouch_delete_pwd);
-        mConfirmBtn = (Button)findViewById(R.id.esptouch_confirm);
+        mCurrentSsidTV = (TextView) findViewById(R.id.esptouch_current_ssid);
+        // mConfigureSP = (Spinner)findViewById(R.id.esptouch_configure_wifi);
+        mPasswordET = (EditText) findViewById(R.id.esptouch_pwd);
+        mSsidET = (TextView) findViewById(R.id.esptouch_ssid);
+        mShowPasswordCB = (CheckBox) findViewById(R.id.esptouch_show_pwd);
+        // mIsSsidHiddenCB = (CheckBox)findViewById(R.id.esptouch_isSsidHidden);
+        //  mDeletePasswordBtn = (Button)findViewById(R.id.esptouch_delete_pwd);
+        mConfirmBtn = (Button) findViewById(R.id.esptouch_confirm);
 
         mShowPasswordCB.setOnCheckedChangeListener(this);
 
@@ -444,32 +334,31 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         mScanResultSsidList = new ArrayList<String>();
         mWifiAdapter =
                 new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, mScanResultSsidList);
-       // mConfigureSP.setAdapter(mWifiAdapter);
-       // mConfigureSP.setOnItemSelectedListener(this);
+        // mConfigureSP.setAdapter(mWifiAdapter);
+        // mConfigureSP.setOnItemSelectedListener(this);
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(mReceiver, filter);
 
     }
-    private MulticastSocket ds;
-    String multicastHost="224.0.0.1";
-    InetAddress receiveAddress;
-    private void familySharing()
-    {
+
+    private void familySharing() {
         try {
             ds = new MulticastSocket(8267);
-             multicastHost="224.0.0.1";
-            receiveAddress=InetAddress.getByName(multicastHost);
+            multicastHost = "224.0.0.1";
+            receiveAddress = InetAddress.getByName(multicastHost);
             ds.joinGroup(receiveAddress);
-            getSharingSocket myThread  = new getSharingSocket();
+            getSharingSocket myThread = new getSharingSocket();
             myThread.start();
         } catch (Exception e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
     }
-    private String  reciveData="";
+
+    private String reciveData = "";
     private InetAddress iaddress;
+
     public class getSharingSocket extends Thread {
         String ip = "";
 
@@ -480,7 +369,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
                 while (ip.isEmpty()) {
                     try {
                         ds.receive(dp);
-                        reciveData =  new String(buf, 0, dp.getLength());
+                        reciveData = new String(buf, 0, dp.getLength());
                         ip = dp.getAddress().toString();
                         iaddress = dp.getAddress();
                     } catch (Exception e) {
@@ -488,10 +377,10 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
                     }
                 }
                 //Toast.makeText(SmartConfigActivity.this, reciveData, Toast.LENGTH_LONG).show();
-                String deviceName =splitData(reciveData,"name:","address:");
-                String address =splitData(reciveData,"address:","end:");
-                String deviceId =splitData(reciveData,"id:","name:");
-                saveShareData(deviceName,address,deviceId);
+                String deviceName = splitData(reciveData, "name:", "address:");
+                String address = splitData(reciveData, "address:", "end:");
+                String deviceId = splitData(reciveData, "id:", "name:");
+                saveShareData(deviceName, address, deviceId);
                 ShareUdpSocket mThread = new ShareUdpSocket();
                 mThread.start();
             } catch (Exception e) {
@@ -503,60 +392,53 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
 
     public String splitData(String str, String strStart, String strEnd) {
         String tempStr;
-        tempStr = str.substring(str.indexOf(strStart) +strStart.length(), str.lastIndexOf(strEnd));
+        tempStr = str.substring(str.indexOf(strStart) + strStart.length(), str.lastIndexOf(strEnd));
         return tempStr;
     }
 
-    private void  saveShareData(String deviceName,String address,String deviceId )
-    {
-        if(!mSharedPreferencesDeviceName.getAll().containsKey(deviceName)&&!deviceName.isEmpty())
-        {
+    private void saveShareData(String deviceName, String address, String deviceId) {
+        if (!mSharedPreferencesDeviceName.getAll().containsKey(deviceName) && !deviceName.isEmpty()) {
             SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
             editor.putString(deviceName, address);
             editor.commit();
-        }
-        else if(deviceName.isEmpty())
-        {
+        } else if (deviceName.isEmpty()) {
             int i = 1;
-            while(mSharedPreferencesDeviceName.getAll().containsKey(deviceName+String.valueOf(i)))
-            {
+            while (mSharedPreferencesDeviceName.getAll().containsKey(deviceName + String.valueOf(i))) {
                 i++;
             }
-            deviceName = deviceName+String.valueOf(i);
+            deviceName = deviceName + String.valueOf(i);
             SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
             editor.putString(deviceName, address);
             editor.commit();
-        }
-        else
-        {
+        } else {
             int i = 1;
-            while(mSharedPreferencesDeviceName.getAll().containsKey("智能环设备"+String.valueOf(i)))
-            {
+            while (mSharedPreferencesDeviceName.getAll().containsKey("智能环设备" + String.valueOf(i))) {
                 i++;
             }
-            deviceName = "智能环设备"+String.valueOf(i);
+            deviceName = "智能环设备" + String.valueOf(i);
             SharedPreferences.Editor editor = mSharedPreferencesDeviceName.edit();
-            editor.putString(deviceName,address);
+            editor.putString(deviceName, address);
             editor.commit();
         }
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         Set<String> setValue = new HashSet<String>();
-        setValue.add("deviceName:"+deviceName);
-        setValue.add("address:"+address);
-        editor.putStringSet(deviceId,setValue);
+        setValue.add("deviceName:" + deviceName);
+        setValue.add("address:" + address);
+        editor.putStringSet(deviceId, setValue);
         editor.commit();
     }
+
     public class ShareUdpSocket extends Thread {
         public void run() {
-            Socket socket=null;
+            Socket socket = null;
             try {
-                socket=new Socket(iaddress, 8268);
+                socket = new Socket(iaddress, 8268);
                 //接受服务端消息并打印
-              //  InputStream is=socket.getInputStream();
-               // byte b[]=new byte[1024];
-              //  is.read(b);
+                //  InputStream is=socket.getInputStream();
+                // byte b[]=new byte[1024];
+                //  is.read(b);
                 //给服务端发送响应信息
-                OutputStream os=socket.getOutputStream();
+                OutputStream os = socket.getOutputStream();
                 os.write(reciveData.getBytes());
                 os.close();
                 socket.close();
@@ -569,21 +451,17 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-        if (compoundButton == mShowPasswordCB)
-        {
-            if (b)
-            {
+        if (compoundButton == mShowPasswordCB) {
+            if (b) {
                 mPasswordET.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            }
-            else
-            {
+            } else {
                 mPasswordET.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
             }
         }
 
     }
-    private class ConfigureTask extends AsyncTask<String, Void, IEsptouchResult> implements DialogInterface.OnCancelListener
-    {
+
+    private class ConfigureTask extends AsyncTask<String, Void, IEsptouchResult> implements DialogInterface.OnCancelListener {
         private Activity mActivity;
 
         private ProgressDialog mDialog;
@@ -594,8 +472,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
 
         private String passwordId;
 
-        public ConfigureTask(Activity activity, String apSsid, String apBssid, String password, boolean isSsidHidden)
-        {
+        public ConfigureTask(Activity activity, String apSsid, String apBssid, String password, boolean isSsidHidden) {
             mActivity = activity;
             mSsid = apSsid;
             mTask = new EsptouchTask(apSsid, apBssid, password, isSsidHidden, SmartConfigActivity.this);
@@ -603,8 +480,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         }
 
         @Override
-        protected void onPreExecute()
-        {
+        protected void onPreExecute() {
             mDialog = new ProgressDialog(mActivity);
             mDialog.setMessage(getString(R.string.esp_esptouch_configure_message, mSsid));
             mDialog.setCanceledOnTouchOutside(false);
@@ -613,45 +489,31 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         }
 
         @Override
-        protected IEsptouchResult doInBackground(String... params)
-        {
+        protected IEsptouchResult doInBackground(String... params) {
             return mTask.executeForResult();
         }
 
         @Override
-        protected void onPostExecute(IEsptouchResult result)
-        {
-            mDialog.dismiss();
-            String add1 = result.getInetAddress().toString();
+        protected void onPostExecute(IEsptouchResult result) {
             int toastMsg;
-            if (result.isSuc())
-            {
+            if (result.isSuc()) {
                 String add = result.getInetAddress().toString();
                 adddeviceSet(add);
-
                 toastMsg = R.string.esp_esptouch_result_suc;
-            }
-            else if (result.isCancelled())
-            {
+            } else if (result.isCancelled()) {
                 toastMsg = R.string.esp_esptouch_result_cancel;
-            }
-            else if (mCurrentSSID.equals(mSsid))
-            {
+            } else if (mCurrentSSID.equals(mSsid)) {
                 toastMsg = R.string.esp_esptouch_result_failed;
-            }
-            else
-            {
+            } else {
                 toastMsg = R.string.esp_esptouch_result_over;
             }
-
+            mDialog.dismiss();
             Toast.makeText(mActivity, toastMsg, Toast.LENGTH_LONG).show();
         }
 
         @Override
-        public void onCancel(DialogInterface dialog)
-        {
-            if (mTask != null)
-            {
+        public void onCancel(DialogInterface dialog) {
+            if (mTask != null) {
                 mTask.interrupt();
                 Toast.makeText(mActivity, R.string.esp_esptouch_result_cancel, Toast.LENGTH_LONG).show();
             }
@@ -660,58 +522,37 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View view) {
-        if (view == mConfirmBtn)
-        {
-            if (!TextUtils.isEmpty(mCurrentSSID))
-            {
+        if (view == mConfirmBtn) {
+            if (!TextUtils.isEmpty(mCurrentSSID)) {
                 String ssid = mSsidET.getText().toString();
                 String password = mPasswordET.getText().toString();
                 mShared.edit().putString(ssid, password).commit();
-               // boolean isSsidHidden = mIsSsidHiddenCB.isChecked();
+                // boolean isSsidHidden = mIsSsidHiddenCB.isChecked();
                 boolean isSsidHidden = true;
                 // find the bssid is scanList
                 String bssid = scanApBssidBySsid(ssid);
-                if (bssid == null)
-                {
+                if (bssid == null) {
                     Toast.makeText(this, getString(R.string.esp_esptouch_cannot_find_ap_hing, ssid), Toast.LENGTH_LONG)
                             .show();
-                }
-                else
-                {
+                } else {
                     new ConfigureTask(this, ssid, bssid, password, isSsidHidden).execute();
 
                 }
-            }
-            else
-            {
+            } else {
                 Toast.makeText(this, R.string.esp_esptouch_connection_hint, Toast.LENGTH_LONG).show();
             }
         }
-//        else if (view == mDeletePasswordBtn)
-//        {
-//            String selectionSSID = mConfigureSP.getSelectedItem().toString();
-//            if (!TextUtils.isEmpty(selectionSSID))
-//            {
-//                mShared.edit().remove(selectionSSID).commit();
-//                mPasswordET.setText("");
-//            }
-//        }
-
     }
 
     private String scanApBssidBySsid(String ssid) {
-        if (TextUtils.isEmpty(ssid))
-        {
+        if (TextUtils.isEmpty(ssid)) {
             return null;
         }
         String bssid = null;
-        for (int retry = 0; bssid == null && retry < 3; retry++)
-        {
+        for (int retry = 0; bssid == null && retry < 3; retry++) {
             scanWifi();
-            for (ScanResult scanResult : mScanResultList)
-            {
-                if (scanResult.SSID.equals(ssid))
-                {
+            for (ScanResult scanResult : mScanResultList) {
+                if (scanResult.SSID.equals(ssid)) {
                     bssid = scanResult.BSSID;
                     return bssid;
                 }

@@ -1,4 +1,4 @@
-package com.example.a15096.myapplication;
+package com.example.a15096.myapplication.deviceAsyncTask;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.a15096.myapplication.ListItemAdapter;
 import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.esptouch.IEsptouchResult;
 
 import java.io.InputStream;
@@ -29,7 +30,7 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
     private ProgressDialog mDialog;
     private List<String> mipList;
     private ListItemAdapter mAdapter;
-    CheckStatusAsyncTask(Activity activity, ListItemAdapter Adapter, List<String> ipList)
+    public CheckStatusAsyncTask(Activity activity, ListItemAdapter Adapter, List<String> ipList)
     {
         this.client = client;
         mActivity = activity;
