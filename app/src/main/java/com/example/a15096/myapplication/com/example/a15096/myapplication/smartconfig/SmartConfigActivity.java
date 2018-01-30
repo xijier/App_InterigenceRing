@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.example.a15096.myapplication.R;
 import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.esptouch.EsptouchTask;
 import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.esptouch.IEsptouchResult;
+import com.example.a15096.myapplication.deviceAsyncTask.GetShareDeviceAsyncTask;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -60,6 +61,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
     private SharedPreferences mSharedPreferencesDeviceName;
     private Socket socket = null;
     private SendAsyncGetIdTask mSendAsyncTask;
+    private GetShareDeviceAsyncTask mGetShareDeviceAsyncTask;
     private TextView mCurrentSsidTV;
     // private Spinner mConfigureSP;
     private TextView mSsidET;
@@ -344,6 +346,8 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
 
     private void familySharing() {
         try {
+         /*     mGetShareDeviceAsyncTask = new GetShareDeviceAsyncTask(this,mSharedPreferences,mSharedPreferencesDeviceName);
+            mGetShareDeviceAsyncTask.execute(); */
             ds = new MulticastSocket(8267);
             multicastHost = "224.0.0.1";
             receiveAddress = InetAddress.getByName(multicastHost);
