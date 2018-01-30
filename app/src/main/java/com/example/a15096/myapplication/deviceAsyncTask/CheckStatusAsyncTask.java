@@ -26,16 +26,17 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
     private Socket client = null;
 
     private Activity mActivity;
-
+    private String maddress;
     private ProgressDialog mDialog;
     private List<String> mipList;
     private ListItemAdapter mAdapter;
-    public CheckStatusAsyncTask(Activity activity, ListItemAdapter Adapter, List<String> ipList)
+    public CheckStatusAsyncTask(Activity activity, ListItemAdapter Adapter, List<String> ipList,String address)
     {
         this.client = client;
         mActivity = activity;
         mAdapter = Adapter;
         mipList = ipList;
+        maddress = address;
     }
 
     @Override
@@ -55,8 +56,9 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
             //setClient(str);
             for(int i = 0 ; i <mipList.size(); i++)
             {
-                setClient(mipList.get(i),i,msg);
+               setClient(mipList.get(i),i,msg);
             }
+         //   setClient(mipList.get(i),i,msg);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -117,7 +119,7 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
                 is.close();
                 os.close();
             } catch (Exception e) {
-                mAdapter.setStatusItem(index,"离线",true,true);
+              //  mAdapter.setStatusItem(index,"离线",true,true);
               //  mAdapter.setStatusItem(index,"离线",false,false);
                 Log.e(e.getMessage(), "setClient: ", e.getCause());
                 e.printStackTrace();

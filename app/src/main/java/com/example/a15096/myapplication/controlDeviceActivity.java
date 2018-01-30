@@ -41,6 +41,7 @@ import com.example.a15096.myapplication.deviceAsyncTask.DeleteAsyncTask;
 import com.example.a15096.myapplication.deviceAsyncTask.SendAsyncMqttTask;
 import com.example.a15096.myapplication.deviceAsyncTask.SendAsyncTask;
 import com.example.a15096.myapplication.deviceAsyncTask.CheckStatusAsyncMqttTask;
+import com.example.a15096.myapplication.deviceAsyncTask.ShareDeviceAsyncTask;
 
 public class controlDeviceActivity extends AppCompatActivity implements InnerItemOnclickListener,
         OnItemClickListener {
@@ -58,6 +59,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private SendAsyncMqttTask mSendAsyncMqttTask;
     private CheckStatusAsyncTask mCheckStatusAsyncTask;
     private CheckStatusAsyncMqttTask mCheckStatusAsyncMqttTask;
+    private ShareDeviceAsyncTask mShareDeviceAsyncTask;
     private static final int PORT = 8266;
     private static String status = "offline";
     private static boolean standalone = true;
@@ -173,10 +175,16 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
     private String deviceInfo;
     private void shareingDevice(int position)
     {
+
+
         String id = getDeviceId(mDataList.get(position));
         String add = mSharedPreferencesDeviceName.getString(mDataList.get(position),"");
 
         deviceInfo = "id:"+id + "name:"+mDataList.get(position)+"address:"+add+"end:";
+
+        mShareDeviceAsyncTask = new ShareDeviceAsyncTask(this);
+        mShareDeviceAsyncTask.execute(deviceInfo);
+        /*
         DatagramPacket dataPacket = null;
         String handlemessage;
         try {
@@ -212,7 +220,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
             ms.close();
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     public class getUdpSocket extends Thread {
@@ -411,8 +419,8 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                     String add = mSharedPreferencesDeviceName.getString(mDataList.get(i),"");
                     ipList.add(add);
                 }
-            mCheckStatusAsyncTask = new CheckStatusAsyncTask(this,mAdapter,ipList);
-            mCheckStatusAsyncTask.execute("checkStatus");
+                mCheckStatusAsyncTask = new CheckStatusAsyncTask(this,mAdapter,ipList,"");
+                mCheckStatusAsyncTask.execute("checkStatus");
             }
             else
             {
