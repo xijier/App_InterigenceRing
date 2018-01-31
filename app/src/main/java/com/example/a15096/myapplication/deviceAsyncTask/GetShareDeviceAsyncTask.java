@@ -58,7 +58,9 @@ public class GetShareDeviceAsyncTask extends AsyncTask<String, Void, Boolean> {
     protected Boolean doInBackground(String... params) {
         String msg = params[0];
         try {
-            getSharing(msg);
+            String str = msg;
+            str += "1";
+         //   getSharing(msg);
         } catch (Exception e) {
             e.printStackTrace();
         }

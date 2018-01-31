@@ -34,6 +34,7 @@ import com.example.a15096.myapplication.R;
 import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.esptouch.EsptouchTask;
 import com.example.a15096.myapplication.com.example.a15096.myapplication.smartconfig.esptouch.IEsptouchResult;
 import com.example.a15096.myapplication.deviceAsyncTask.GetShareDeviceAsyncTask;
+import com.example.a15096.myapplication.deviceAsyncTask.ShareDeviceAsyncTask;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -244,7 +245,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
             TextView deviceSetname = (TextView) findViewById(R.id.deviceSetname);
             TextView wifipassword = (TextView) findViewById(R.id.esptouch_pwd);
             String deviceName = deviceSetname.getText().toString();
-            saveShareData(deviceName,address,deviceId);
+            saveShareData(deviceName, address, deviceId);
         }
 
         @Override
@@ -299,10 +300,13 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    private Context mContext = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_smart_config);
+        mContext = SmartConfigActivity.this;
         mShared = getSharedPreferences(SSID_PASSWORD, Context.MODE_PRIVATE);
 
         mSharedPreferences = getSharedPreferences(PREFRENCE_FILE_KEY, Context.MODE_PRIVATE);
@@ -344,30 +348,57 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
 
     }
 
-    private void familySharing() {
+    public void familySharing() {
         try {
-         /*     mGetShareDeviceAsyncTask = new GetShareDeviceAsyncTask(this,mSharedPreferences,mSharedPreferencesDeviceName);
-            mGetShareDeviceAsyncTask.execute(); */
+
+            TestAsyncTask test = new TestAsyncTask(this);
+            test.execute("123");
+          /*    mGetShareDeviceAsyncTask = new GetShareDeviceAsyncTask(this,mSharedPreferences,mSharedPreferencesDeviceName);
+            mGetShareDeviceAsyncTask.execute();
             ds = new MulticastSocket(8267);
             multicastHost = "224.0.0.1";
             receiveAddress = InetAddress.getByName(multicastHost);
             ds.joinGroup(receiveAddress);
             getSharingSocket myThread = new getSharingSocket();
-            myThread.start();
+            myThread.start();*/
         } catch (Exception e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
     }
 
-    private String reciveData = "";
-    private InetAddress iaddress;
+    public class TestAsyncTask extends AsyncTask<String, Void, Boolean> {
+        //    private ProgressDialog mDialog;
+        private Activity mActivity;
+        private ProgressDialog mDialog;
 
-    public class getSharingSocket extends Thread {
-        String ip = "";
+        public TestAsyncTask(Activity activity) {
+            mActivity = activity;
+        }
 
-        public void run() {
+        @Override
+        protected void onPreExecute() {
+            mDialog = new ProgressDialog(mActivity);
+            mDialog.setMessage("正在获取设备分享信息...");
+            mDialog.setCanceledOnTouchOutside(false);
+            //   mDialog.setOnCancelListener(this);
+            mDialog.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            String msg = params[0];
+            String ip="";
+            boolean isgetDeveice = false;
             try {
+                Thread.sleep(2000);
+                ds = new MulticastSocket(8267);
+                ds.setSoTimeout(10000);
+                multicastHost = "224.0.0.1";
+                receiveAddress = InetAddress.getByName(multicastHost);
+                ds.joinGroup(receiveAddress);
+               // getSharingSocket myThread = new getSharingSocket();
+               // myThread.start();
                 byte buf[] = new byte[1024];
                 DatagramPacket dp = new DatagramPacket(buf, 1024);
                 while (ip.isEmpty()) {
@@ -376,23 +407,46 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
                         reciveData = new String(buf, 0, dp.getLength());
                         ip = dp.getAddress().toString();
                         iaddress = dp.getAddress();
+                        Thread.sleep(500);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        break;
                     }
                 }
+                if(!ip.isEmpty())
+                {
+                    isgetDeveice =true;
+                    String deviceName = splitData(reciveData, "name:", "address:");
+                    String address = splitData(reciveData, "address:", "end:");
+                    String deviceId = splitData(reciveData, "id:", "name:");
+                    saveShareData(deviceName, address, deviceId);
+                    ShareUdpSocket mThread = new ShareUdpSocket();
+                    mThread.start();
+                }
                 //Toast.makeText(SmartConfigActivity.this, reciveData, Toast.LENGTH_LONG).show();
-                String deviceName = splitData(reciveData, "name:", "address:");
-                String address = splitData(reciveData, "address:", "end:");
-                String deviceId = splitData(reciveData, "id:", "name:");
-                saveShareData(deviceName, address, deviceId);
-                ShareUdpSocket mThread = new ShareUdpSocket();
-                mThread.start();
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
+            }
+            return isgetDeveice;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean result) {
+            mDialog.dismiss();
+            int toastMsg;
+            if(result)
+            {
+                Toast.makeText(SmartConfigActivity.this, "获取成功", Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(SmartConfigActivity.this, "获取失败", Toast.LENGTH_LONG).show();
             }
         }
     }
+
+    private String reciveData = "";
+    private InetAddress iaddress;
 
     public String splitData(String str, String strStart, String strEnd) {
         String tempStr;
