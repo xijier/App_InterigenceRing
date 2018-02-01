@@ -28,9 +28,10 @@ public class SendAsyncTask extends AsyncTask<String, Void, Boolean> {
     @Override
     protected Boolean doInBackground(String... params) {
         String str = params[0];
+        String add = params[1];
         try {
            // setServer(str);
-            boolean isSuccess =setClient(str);
+            boolean isSuccess =setClient(str,add);
             return  isSuccess;
         } catch (Exception e) {
             e.printStackTrace();
@@ -39,50 +40,15 @@ public class SendAsyncTask extends AsyncTask<String, Void, Boolean> {
         return null;
     }
 
-    protected void setServer(String msg)
-    {
-        ServerSocket serverSocket=null;
-        Socket socket=null;
-       // String msg="a";
-        try {
-            //构造ServerSocket实例，指定端口监听客户端的连接请求
-            serverSocket=new ServerSocket(8266);
-            String ip =  serverSocket.getLocalSocketAddress().toString();
-            //建立跟客户端的连接
-            socket=serverSocket.accept();
-            //向客户端发送消息
-            OutputStream os=socket.getOutputStream();
-            os.write(msg.getBytes());
-            InputStream is=socket.getInputStream();
-            //接受客户端的响应
-            byte[] b=new byte[1024];
-            is.read(b);
-            String str = new String(b);
-            System.out.println(str.trim()+" "+str.length());
-            serverSocket.close();
-            socket.close();
-        } catch (Exception e) {
-            Log.e(e.getMessage(), "setServer: ", e.getCause());
-            e.printStackTrace();
-        } finally {
-            //操作结束，关闭socket
-            try {
-                serverSocket.close();
-                socket.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    protected  boolean setClient(String msg)
+    protected  boolean setClient(String msg,String add)
     {
         boolean isSuccess = false;
-      // Socket socket=null;
+        Socket socket=null;
         try {
-            //socket=new Socket("192.168.0.109", 8266);
+            socket=new Socket(add, 8266);
             //给服务端发送响应信息
-            OutputStream os=client.getOutputStream();
+            //OutputStream os=client.getOutputStream();
+            OutputStream os=socket.getOutputStream();
             os.write(msg.getBytes());
             //is.close();
             //接受服务端消息并打印
@@ -103,7 +69,8 @@ public class SendAsyncTask extends AsyncTask<String, Void, Boolean> {
         } finally {
             //操作结束，关闭socket
             try {
-                client.close();
+              //  client.close();
+                socket.close();
                 return  isSuccess;
             } catch (Exception e) {
                 e.printStackTrace();

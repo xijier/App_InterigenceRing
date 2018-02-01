@@ -22,9 +22,6 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
-
-    private Socket client = null;
-
     private Activity mActivity;
     private String maddress;
     private ProgressDialog mDialog;
@@ -32,7 +29,6 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
     private ListItemAdapter mAdapter;
     public CheckStatusAsyncTask(Activity activity, ListItemAdapter Adapter, List<String> ipList,String address)
     {
-        this.client = client;
         mActivity = activity;
         mAdapter = Adapter;
         mipList = ipList;
@@ -45,7 +41,6 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
         mDialog = new ProgressDialog(mActivity);
         mDialog.setMessage("正在获取设备信息...");
         mDialog.setCanceledOnTouchOutside(false);
-      //  mDialog.setOnCancelListener(this);
         mDialog.show();
     }
 
@@ -53,16 +48,13 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
     protected Boolean doInBackground(String... params) {
         String msg = params[0];
         try {
-            //setClient(str);
             for(int i = 0 ; i <mipList.size(); i++)
             {
                setClient(mipList.get(i),i,msg);
             }
-         //   setClient(mipList.get(i),i,msg);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -70,10 +62,7 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
     protected void onPostExecute(final Boolean result)
     {
         mDialog.dismiss();
-      //  String add1 = result.getInetAddress().toString();
         mAdapter.notifyDataSetChanged();
-        int toastMsg;
-
        // Toast.makeText(mActivity, toastMsg, Toast.LENGTH_LONG).show();
     }
 
@@ -82,7 +71,7 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
         try {
             Socket socket=null;
             try {
-                TimeUnit.MILLISECONDS.sleep(1000);
+                //TimeUnit.MILLISECONDS.sleep(1000);
                 socket=new Socket(ip, 8266);
                // socket.setSoTimeout(1000);
                 //给服务端发送响应信息
@@ -92,6 +81,7 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
                 InputStream is=socket.getInputStream();
                 String str="";
                 int i = 0;
+                long v1 =System.currentTimeMillis();
                 while(str.isEmpty()) {
                     byte b[] = new byte[is.available()];
                     is.read(b);
@@ -103,18 +93,19 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
                     i++;
                     TimeUnit.MILLISECONDS.sleep(100);
                 }
-
+                long v2 =System.currentTimeMillis();
+                long temp = v2 - v1;
                 if(str.equals("ison"))
-                {
-                    mAdapter.setStatusItem(index,"在线",true,true);
-                }
-                else if(str.equals("isoff"))
                 {
                     mAdapter.setStatusItem(index,"在线",false,true);
                 }
+                else if(str.equals("isoff"))
+                {
+                    mAdapter.setStatusItem(index,"在线",true,true);
+                }
                 else
                 {
-                    mAdapter.setStatusItem(index,"离线",true,true);
+                    mAdapter.setStatusItem(index,"离线",false,false);
                 }
                 is.close();
                 os.close();

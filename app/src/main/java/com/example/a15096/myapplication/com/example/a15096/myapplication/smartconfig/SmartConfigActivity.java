@@ -393,7 +393,7 @@ public class SmartConfigActivity extends AppCompatActivity implements View.OnCli
             try {
                 Thread.sleep(2000);
                 ds = new MulticastSocket(8267);
-                ds.setSoTimeout(10000);
+                ds.setSoTimeout(20000);
                 multicastHost = "224.0.0.1";
                 receiveAddress = InetAddress.getByName(multicastHost);
                 ds.joinGroup(receiveAddress);
