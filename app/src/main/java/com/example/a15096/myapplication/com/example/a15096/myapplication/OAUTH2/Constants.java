@@ -6,7 +6,7 @@ package com.example.a15096.myapplication.com.example.a15096.myapplication.OAUTH2
 
 public interface Constants {
     //public static final String APP_ID = "wxd930ea5d5a258f4f";
-    public static final String APP_ID = "wx6b7a262669c9897b";
+    public static final String APP_ID = "wxe57a5623c78f6154";
 
     public static class ShowMsgActivity {
         public static final String STitle = "showmsg_title";

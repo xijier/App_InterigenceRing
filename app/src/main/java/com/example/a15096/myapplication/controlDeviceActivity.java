@@ -129,16 +129,16 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                 try {
                     if (checklight.isChecked()) {
                         if (standalone) {
-                            getConnectSocket("ison", add, false);
+                            getConnectSocket("isoff", add, false);
                         } else {
-                            getConnectMqtt("on", deviceId, false);
+                            getConnectMqtt("off", deviceId, false);
                         }
                         //
                     } else {
                         if (standalone) {
-                            getConnectSocket("isoff", add, false);
+                            getConnectSocket("ison", add, false);
                         } else {
-                            getConnectMqtt("off", deviceId, false);
+                            getConnectMqtt("on", deviceId, false);
                         }
                         //
                     }
@@ -280,8 +280,8 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                         // 清除sharedpreferences的数据
                         String add = mSharedPreferencesDeviceName.getString(mDataList.get(pos), "");
                         //String add = mSharedPreferences.getString(mDataList.get(pos),"");
-                        Boolean isSuccess = getDeleteDeviceSocket("reset", add, pos, false);
-                        if (isSuccess) {
+                       Boolean isSuccess = getDeleteDeviceSocket("reset", add, pos, false);
+                        if (true) {
                             String id = getDeviceId(mDataList.get(pos));
                             Editor editorid = mSharedPreferences.edit();
                             editorid.remove(id);

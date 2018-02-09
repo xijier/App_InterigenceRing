@@ -81,7 +81,6 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
                 InputStream is=socket.getInputStream();
                 String str="";
                 int i = 0;
-                long v1 =System.currentTimeMillis();
                 while(str.isEmpty()) {
                     byte b[] = new byte[is.available()];
                     is.read(b);
@@ -93,8 +92,6 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
                     i++;
                     TimeUnit.MILLISECONDS.sleep(100);
                 }
-                long v2 =System.currentTimeMillis();
-                long temp = v2 - v1;
                 if(str.equals("ison"))
                 {
                     mAdapter.setStatusItem(index,"在线",false,true);
