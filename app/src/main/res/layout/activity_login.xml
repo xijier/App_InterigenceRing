@@ -4,10 +4,8 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#FFFFFF"
+
     tools:context="com.example.a15096.myapplication.LoginActivity">
     <!-- Login progress -->
     <ProgressBar
@@ -18,104 +16,177 @@
         android:layout_marginBottom="8dp"
         android:visibility="gone"/>
 
-    <ScrollView
+    <LinearLayout
         android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/login_pic"
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="230dp"
+                android:background="@drawable/login_pic" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/email_login_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin">
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <AutoCompleteTextView
-                android:id="@+id/email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/prompt_user"
-                android:maxLines="1"
-                    android:text="xijier"
-                android:singleLine="true"/>
-
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/prompt_password"
-                android:imeActionId="@+id/login"
-                android:imeActionLabel="@string/action_sign_in_short"
-                android:imeOptions="actionUnspecified"
-                android:inputType="textPassword"
-                android:maxLines="1"
-                android:text="123456"
-                android:singleLine="true"/>
-
-            </android.support.design.widget.TextInputLayout>
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5.0dip"
-            android:layout_marginTop="10.0dip"
-            android:orientation="horizontal"
-            android:touchscreenBlocksFocus="false">
-            <Button
-                android:id="@+id/email_sign_in_button"
-                style="?android:textAppearanceSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_weight="1"
-                android:text="@string/action_sign_in"
-                android:textStyle="bold"/>
-            <Button
-                android:id="@+id/email_register_button"
-                style="?android:textAppearanceSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_weight="1"
-                android:text="@string/action_register"
-                android:textStyle="bold"/>
-            </LinearLayout>
             <LinearLayout
-                android:id="@+id/layout_login_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin">
+
+                <TextView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/userlogin" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/email"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:hint="@string/prompt_user"
+                        android:maxLines="1"
+                        android:singleLine="true" />
+
+                </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin">
+
+                <TextView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/passwordlogin" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/password"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:hint="@string/prompt_password"
+                        android:imeActionId="@+id/login"
+                        android:imeOptions="actionUnspecified"
+                        android:inputType="textPassword"
+                        android:maxLines="1"
+                        android:singleLine="true" />
+                </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
+
+
+            <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="5.0dip"
                 android:layout_marginTop="10.0dip"
+                android:orientation="vertical"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:paddingTop="16dp"
+                android:touchscreenBlocksFocus="false">
+
+                <Button
+                    android:id="@+id/email_sign_in_button"
+                    style="?android:textAppearanceSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_weight="1"
+                    android:background="#009999"
+                    android:text="登 陆"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:layout_marginTop="5dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/email_register_button"
+                        style="?android:textAppearanceSmall"
+                        android:layout_width="204dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:layout_weight="1"
+                        android:text="注册新账号"
+                        android:textColor="#009999"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/email_register_button"
+                        style="?android:textAppearanceSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:layout_weight="1"
+                        android:text="忘记密码？"
+                        android:textColor="#009999"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                L
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_login_name"
+                android:layout_width="fill_parent"
+                android:layout_height="150dp"
+                android:layout_margin="5.0dip"
+                android:layout_marginTop="10.0dip"
                 android:orientation="horizontal"
                 android:touchscreenBlocksFocus="false">
+
                 <Button
                     android:id="@+id/button_wechat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-
-                    android:background="@drawable/weixin" />
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/wechat" />
 
                 <Button
                     android:id="@+id/button_weibo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/weibo" />
+                    android:layout_width="100dp"
+                    android:layout_height="98dp"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/sina" />
+
                 <Button
                     android:id="@+id/button_withoutNetwork"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="无网登陆"
-                    android:layout_margin="10dp"/>
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/nonet" />
             </LinearLayout>
         </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
 </LinearLayout>
