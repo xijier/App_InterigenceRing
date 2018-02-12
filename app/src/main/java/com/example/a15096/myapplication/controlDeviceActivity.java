@@ -280,7 +280,7 @@ public class controlDeviceActivity extends AppCompatActivity implements InnerIte
                         // 清除sharedpreferences的数据
                         String add = mSharedPreferencesDeviceName.getString(mDataList.get(pos), "");
                         //String add = mSharedPreferences.getString(mDataList.get(pos),"");
-                       Boolean isSuccess = getDeleteDeviceSocket("reset", add, pos, false);
+                        Boolean isSuccess = getDeleteDeviceSocket("reset", add, pos, false);
                         if (true) {
                             String id = getDeviceId(mDataList.get(pos));
                             Editor editorid = mSharedPreferences.edit();

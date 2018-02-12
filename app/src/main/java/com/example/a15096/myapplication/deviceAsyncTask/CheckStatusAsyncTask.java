@@ -102,7 +102,7 @@ public class CheckStatusAsyncTask extends AsyncTask<String, Void, Boolean> {
                 }
                 else
                 {
-                    mAdapter.setStatusItem(index,"离线",false,false);
+                    mAdapter.setStatusItem(index,"离线",true,true);
                 }
                 is.close();
                 os.close();

@@ -2,15 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="45dp"
+    android:background="#E8E8E8"
     xmlns:tools="http://schemas.android.com/tools"
-    android:weightSum="1">
-
+    android:orientation="horizontal">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:background="#ffffff">
     <CheckBox
         android:id="@+id/checkboxlight"
-        android:layout_height="match_parent"
+        style="@style/customCheckbox"
         android:layout_width="wrap_content"
-        style="@style/customCheckbox" />
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp" />
     <!--<Switch-->
         <!--android:id="@+id/switchlight"-->
         <!--android:layout_width="wrap_content"-->
@@ -18,28 +25,46 @@
         <!--android:checked="false"-->
         <!--android:textOn="开"-->
         <!--tools:checked="false" />-->
-    <TextView
-        android:id="@+id/deviceDecription"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textSize="25dp"
-        android:text="我的设备01" />
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="25dp"
-        android:text="离线"/>
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.37"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/deviceDecription"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="left"
+            android:layout_weight="1.2"
+            android:gravity="bottom"
+            android:text="灯one"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="left"
+            android:layout_weight="1"
+            android:gravity="top"
+            android:text="离线"
+            android:textSize="15dp" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/buttonDelete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/delete" />
+        android:layout_width="41dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+
+        android:background="@drawable/presence_busy" />
+
     <Button
         android:id="@+id/buttonSharing"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="分享"/>
+        android:layout_weight="0.15"
+        android:background="@drawable/ic_menu_send" />
+</LinearLayout>
 </LinearLayout>

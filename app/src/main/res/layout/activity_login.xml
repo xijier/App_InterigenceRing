@@ -52,6 +52,7 @@
                 <TextView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
+                    android:layout_gravity="center"
                     android:background="@drawable/userlogin" />
 
                 <android.support.design.widget.TextInputLayout
@@ -79,6 +80,7 @@
                 <TextView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
+                    android:layout_gravity="center"
                     android:background="@drawable/passwordlogin" />
 
                 <android.support.design.widget.TextInputLayout
@@ -88,11 +90,9 @@
                     <EditText
                         android:id="@+id/password"
                         android:layout_width="match_parent"
-                        android:layout_height="30dp"
+                        android:layout_height="wrap_content"
                         android:hint="@string/prompt_password"
                         android:imeActionId="@+id/login"
-                        android:imeOptions="actionUnspecified"
-                        android:inputType="textPassword"
                         android:maxLines="1"
                         android:singleLine="true" />
                 </android.support.design.widget.TextInputLayout>
@@ -159,7 +159,7 @@
             <LinearLayout
                 android:id="@+id/layout_login_name"
                 android:layout_width="fill_parent"
-                android:layout_height="150dp"
+                android:layout_height="104dp"
                 android:layout_margin="5.0dip"
                 android:layout_marginTop="10.0dip"
                 android:orientation="horizontal"
@@ -167,23 +167,26 @@
 
                 <Button
                     android:id="@+id/button_wechat"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_margin="3dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:layout_weight="1"
                     android:background="@drawable/wechat" />
 
                 <Button
                     android:id="@+id/button_weibo"
-                    android:layout_width="100dp"
-                    android:layout_height="98dp"
-                    android:layout_margin="3dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:layout_weight="1"
                     android:background="@drawable/sina" />
 
                 <Button
                     android:id="@+id/button_withoutNetwork"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_margin="3dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:layout_weight="1"
                     android:background="@drawable/nonet" />
             </LinearLayout>
         </LinearLayout>

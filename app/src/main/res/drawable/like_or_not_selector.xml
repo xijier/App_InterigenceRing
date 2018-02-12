@@ -4,7 +4,7 @@
     <item  android:state_enabled="false"
         android:drawable="@drawable/button_unenable"/>
     <item  android:state_checked="true"
-        android:drawable="@drawable/button_on"/>
+        android:drawable="@drawable/btn_radio_on"/>
     <item  android:state_checked="false"
-        android:drawable="@drawable/button_off"/>
+        android:drawable="@drawable/btn_radio_off_selected"/>
 </selector>
